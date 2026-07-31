@@ -11,7 +11,10 @@ SELECT
 FROM "account_registry__user_registered" u
 LEFT JOIN role_wearer r ON lower(r.wearer) = lower(u.user)
 LEFT JOIN (
-    SELECT "to" AS holder, sum(CAST(value AS DOUBLE)) AS earned
+    -- `value_dec` is the exact DECIMAL(38,0) companion — correct for 18-decimal token amounts,
+    -- which are nowhere near the 38-digit overflow ceiling. Prefer it over CAST(… AS DOUBLE),
+    -- which would silently lose precision on large balances.
+    SELECT "to" AS holder, sum(value_dec) AS earned
     FROM "participation_token__transfer"
     WHERE "from" = '0x0000000000000000000000000000000000000000'
     GROUP BY "to"
@@ -23,7 +26,7 @@ CREATE VIEW paymaster_spend AS
 SELECT
     orgId                           AS org_id,
     count(*)                        AS sponsored_ops,
-    sum(CAST(delta AS DOUBLE))      AS total_delta,
+    sum(delta_dec)                  AS total_delta,
     min(block_number)               AS first_block,
     max(block_number)               AS last_block
 FROM "paymaster_hub__usage_increased"

@@ -1,16 +1,18 @@
 -- Current Hats Protocol role holders (mirrors the subgraph `RoleWearer`).
 --
 -- Hats are ERC-1155-shaped: a grant is a TransferSingle from 0x0, a revocation is one to 0x0.
--- Netting mints against burns gives the live wearer set. `id` is a 256-bit hat ID whose `_dec`
--- companion overflows, so the arithmetic is done on CAST(value AS DOUBLE) — safe here because
--- hat balances are 0 or 1, never large.
+-- Netting mints against burns gives the live wearer set.
+--
+-- `value_dec` (exact DECIMAL) is used for the netting — hat balances are 0 or 1. `id` is NOT
+-- netted or summed: hat IDs run to ~70 digits, so `id_dec` overflows DECIMAL(38,0) and is always
+-- NULL. It is only ever grouped on as exact text, which is correct and lossless.
 CREATE VIEW role_wearer AS
 WITH moves AS (
-    SELECT id, "to" AS wearer, CAST(value AS DOUBLE) AS delta, block_number
+    SELECT id, "to" AS wearer, value_dec AS delta, block_number
     FROM "hats__transfer_single"
     WHERE "to" <> '0x0000000000000000000000000000000000000000'
     UNION ALL
-    SELECT id, "from" AS wearer, -CAST(value AS DOUBLE) AS delta, block_number
+    SELECT id, "from" AS wearer, -value_dec AS delta, block_number
     FROM "hats__transfer_single"
     WHERE "from" <> '0x0000000000000000000000000000000000000000'
 )

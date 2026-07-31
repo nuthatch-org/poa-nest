@@ -310,8 +310,19 @@ abis/             20 ABIs, vendored from the subgraph's own IPFS CIDs
 views/            10 entity views as plain CREATE VIEW SQL
 checks/           3 invariant checks + their recorded fixtures
 semantic.toml     what each table means (agents read this via the schema tool)
+schema.json       DERIVED from nuthatch.toml — drives the `_dec` columns
+llms.txt          DERIVED — the AI-facing surface
 segments/         sealed Parquet history — regenerable, safe to delete
 nuthatch.redb     the hot store near the tip — regenerable, safe to delete
+```
+
+**If you hand-edit `nuthatch.toml`, run `nuthatch schema` afterwards.** `schema.json` and
+`llms.txt` are derived artifacts, and `schema.json` is what generates the `_dec` companion columns.
+Without it every `_dec` column silently disappears — while `/schema` still advertises them, so
+queries that follow its advice fail. Regenerating takes a second:
+
+```sh
+nuthatch schema --dir .
 ```
 
 Delete `segments/` and `nuthatch.redb` to force a clean rebuild. It takes 90 seconds.
