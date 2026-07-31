@@ -1,3 +1,7 @@
+# semantic.toml - what this nest's data *means* (RFC-0016). Read by the MCP `schema`
+# tool, the admin UI, and the scaffolded skill. Edit descriptions freely; the
+# `[table.*.footguns]` are DERIVED from the ABI and regenerated - leave them be.
+
 schema_version = 1
 
 [nest]
@@ -14,100 +18,2404 @@ and ~850 events in total across ~43M blocks. Every table here is tiny. If a quer
 thousands of rows, you have made a cartesian join, not a discovery.
 """
 
-# --- protocol infrastructure -------------------------------------------------
+[table.account_registry__batch_registered]
+description = "`BatchRegistered(uint256)` events emitted by the `account_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per BatchRegistered(uint256) event"
 
-[table.poa_manager__beacon_created]
-description = "A new upgradeable module type registered on the protocol. typeName is the human label ('HybridVoting', 'TaskManager', …); typeId is its keccak key used everywhere else."
-grain = "one row per module type ever registered"
+[table.account_registry__batch_registered.columns]
+count = "The `count` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
-[table.poa_manager__beacon_upgraded]
-description = "A module type's implementation was swapped. The protocol's upgrade history — the busiest infra table here."
-grain = "one row per upgrade of one module type"
+[table.account_registry__batch_registered.footguns]
+big_ints = ["count"]
+overflows_dec = ["count"]
 
-[table.poa_manager__infrastructure_deployed]
-description = "Fires exactly once, at block 447060027, announcing the six singleton infrastructure addresses. This is why org_deployer/org_registry/paymaster_hub/account_registry are static contracts in this nest rather than factory templates."
-grain = "one row, ever"
+[table.account_registry__initialized]
+description = "`Initialized(uint64)` events emitted by the `account_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
 
-[table.org_deployer__org_deployed]
-description = "A new organisation and its ten governance modules, all in one event. Each module address is its own named column (hybridVoting, taskManager, …)."
-grain = "one row per organisation"
+[table.account_registry__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
-[table.org_registry__org_registered]
-description = "An org's canonical registry entry. `name` is bytes-encoded, not a string — decode it rather than comparing it directly."
-grain = "one row per organisation"
+[table.account_registry__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `account_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
 
-[table.org_registry__contract_registered]
-description = "Every module proxy registered against an org, with the SwitchableBeacon fronting it. This is the factory event that discovers the switchable_beacon children."
-grain = "one row per (org, module)"
+[table.account_registry__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
-# --- governance --------------------------------------------------------------
+[table.account_registry__passkey_factory_updated]
+description = "`PasskeyFactoryUpdated(address)` events emitted by the `account_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per PasskeyFactoryUpdated(address) event"
 
-[table.hybrid_voting__new_proposal]
-description = "A proposal opened on the hybrid (token + participation weighted) voting module."
-grain = "one row per proposal"
+[table.account_registry__passkey_factory_updated.columns]
+factory = "The `factory` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
-[table.hybrid_voting__vote_cast]
-description = "A vote on a hybrid proposal. NOTE: this is a different event shape from dd_voting__vote_cast — it carries per-class weights. The two are deliberately separate tables; do not UNION them without aligning columns."
-grain = "one row per vote"
+[table.account_registry__profile_metadata_updated]
+description = "`ProfileMetadataUpdated(address,bytes32)` events emitted by the `account_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProfileMetadataUpdated(address,bytes32) event"
 
-[table.hybrid_voting__winner]
-description = "The resolved outcome of a hybrid proposal."
-grain = "one row per resolved proposal"
+[table.account_registry__profile_metadata_updated.columns]
+metadataHash = "The `metadataHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
-[table.dd_voting__vote_cast]
-description = "A vote on the direct-democracy module (one member, one vote). Different signature from hybrid_voting__vote_cast — see that table's note."
-grain = "one row per vote"
+[table.account_registry__profile_metadata_updated.footguns]
+reserved_words = ["user"]
 
-# --- work and membership -----------------------------------------------------
+[table.account_registry__user_deleted]
+description = "`UserDeleted(address,string)` events emitted by the `account_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per UserDeleted(address,string) event"
 
-[table.task_manager__task_created]
-description = "A bounty/task opened under a project. `payout` is in participation-token base units."
-grain = "one row per task"
+[table.account_registry__user_deleted.columns]
+oldUsername = "The `oldUsername` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
-[table.task_manager__task_completed]
-description = "A task marked complete — the event that triggers the participation-token payout."
-grain = "one row per completion"
-
-[table.task_manager__project_created]
-description = "A project: the folder tasks are grouped under, with its own bounty cap."
-grain = "one row per project"
-
-[table.hats__transfer_single]
-description = "Hats Protocol role assignment. A mint is from = 0x0; a burn/revoke is to = 0x0. The largest table in this nest and the source of truth for who holds which role — `id` is the hat ID, not an ERC-20 amount."
-grain = "one row per role grant or revocation"
-
-[table.eligibility_module__vouched]
-description = "One member vouching for another's eligibility for a role — the social-graph layer of role assignment."
-grain = "one row per vouch"
+[table.account_registry__user_deleted.footguns]
+reserved_words = ["user"]
 
 [table.account_registry__user_registered]
 description = "A username claimed against an address in the universal account registry."
 grain = "one row per registration"
 
-[table.quick_join__quick_joined]
-description = "A member joining an org through the QuickJoin flow, receiving their initial hats."
-grain = "one row per join"
+[table.account_registry__user_registered.columns]
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+username = "The `username` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
-# --- economics ---------------------------------------------------------------
+[table.account_registry__user_registered.footguns]
+reserved_words = ["user"]
+
+[table.account_registry__username_changed]
+description = "`UsernameChanged(address,string)` events emitted by the `account_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per UsernameChanged(address,string) event"
+
+[table.account_registry__username_changed.columns]
+newUsername = "The `newUsername` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.account_registry__username_changed.footguns]
+reserved_words = ["user"]
+
+[table.dd_voting__creator_hat_set]
+description = "`CreatorHatSet(uint256,bool)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CreatorHatSet(uint256,bool) event"
+
+[table.dd_voting__creator_hat_set.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hat = "The `hat` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__creator_hat_set.footguns]
+big_ints = ["hat"]
+overflows_dec = ["hat"]
+
+[table.dd_voting__executor_updated]
+description = "`ExecutorUpdated(address)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ExecutorUpdated(address) event"
+
+[table.dd_voting__executor_updated.columns]
+newExecutor = "The `newExecutor` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__hat_set]
+description = "`HatSet(uint8,uint256,bool)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatSet(uint8,uint256,bool) event"
+
+[table.dd_voting__hat_set.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hat = "The `hat` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatType = "The `hatType` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__hat_set.footguns]
+big_ints = ["hat"]
+overflows_dec = ["hat"]
+
+[table.dd_voting__hat_toggled]
+description = "`HatToggled(uint256,bool)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatToggled(uint256,bool) event"
+
+[table.dd_voting__hat_toggled.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__hat_toggled.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.dd_voting__initialized]
+description = "`Initialized(uint64)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.dd_voting__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__new_hat_proposal]
+description = "`NewHatProposal(uint256,bytes,bytes32,uint8,uint64,uint64,uint256[])` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per NewHatProposal(uint256,bytes,bytes32,uint8,uint64,uint64,uint256[]) event"
+
+[table.dd_voting__new_hat_proposal.columns]
+created = "The `created` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+descriptionHash = "The `descriptionHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+endTs = "The `endTs` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+numOptions = "The `numOptions` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__new_hat_proposal.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.dd_voting__new_proposal]
+description = "`NewProposal(uint256,bytes,bytes32,uint8,uint64,uint64)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per NewProposal(uint256,bytes,bytes32,uint8,uint64,uint64) event"
+
+[table.dd_voting__new_proposal.columns]
+created = "The `created` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+descriptionHash = "The `descriptionHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+endTs = "The `endTs` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+numOptions = "The `numOptions` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__new_proposal.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.dd_voting__proposal_cleaned]
+description = "`ProposalCleaned(uint256,uint256)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProposalCleaned(uint256,uint256) event"
+
+[table.dd_voting__proposal_cleaned.columns]
+cleaned = "The `cleaned` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__proposal_cleaned.footguns]
+big_ints = [
+    "id",
+    "cleaned",
+]
+overflows_dec = [
+    "id",
+    "cleaned",
+]
+
+[table.dd_voting__proposal_execution_failed]
+description = "`ProposalExecutionFailed(uint256,uint256,bytes)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProposalExecutionFailed(uint256,uint256,bytes) event"
+
+[table.dd_voting__proposal_execution_failed.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+reason = "The `reason` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+winningIdx = "The `winningIdx` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__proposal_execution_failed.footguns]
+big_ints = [
+    "id",
+    "winningIdx",
+]
+overflows_dec = [
+    "id",
+    "winningIdx",
+]
+
+[table.dd_voting__quorum_set]
+description = "`QuorumSet(uint32)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per QuorumSet(uint32) event"
+
+[table.dd_voting__quorum_set.columns]
+quorum = "The `quorum` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__target_allowed]
+description = "`TargetAllowed(address,bool)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TargetAllowed(address,bool) event"
+
+[table.dd_voting__target_allowed.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+target = "The `target` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__threshold_pct_set]
+description = "`ThresholdPctSet(uint8)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ThresholdPctSet(uint8) event"
+
+[table.dd_voting__threshold_pct_set.columns]
+pct = "The `pct` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__vote_cast]
+description = "A vote on the direct-democracy module (one member, one vote). Different signature from hybrid_voting__vote_cast — see that table's note."
+grain = "one row per vote"
+
+[table.dd_voting__vote_cast.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+idxs = "The `idxs` uint8[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+voter = "The `voter` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+weights = "The `weights` uint8[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__vote_cast.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.dd_voting__winner]
+description = "`Winner(uint256,uint256,bool)` events emitted by the `dd_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Winner(uint256,uint256,bool) event"
+
+[table.dd_voting__winner.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+valid = "The `valid` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+winningIdx = "The `winningIdx` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dd_voting__winner.footguns]
+big_ints = [
+    "id",
+    "winningIdx",
+]
+overflows_dec = [
+    "id",
+    "winningIdx",
+]
+
+[table.dkim_registry__key_hash_revoked]
+description = "`KeyHashRevoked(bytes32,bytes32)` events emitted by the `dkim_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per KeyHashRevoked(bytes32,bytes32) event"
+
+[table.dkim_registry__key_hash_revoked.columns]
+domainHash = "The `domainHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+keyHash = "The `keyHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dkim_registry__key_hash_set]
+description = "`KeyHashSet(bytes32,bytes32,bool,uint256)` events emitted by the `dkim_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per KeyHashSet(bytes32,bytes32,bool,uint256) event"
+
+[table.dkim_registry__key_hash_set.columns]
+domainHash = "The `domainHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+keyHash = "The `keyHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+valid = "The `valid` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+validUntil = "The `validUntil` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.dkim_registry__key_hash_set.footguns]
+big_ints = ["validUntil"]
+overflows_dec = ["validUntil"]
+
+[table.dkim_registry__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `dkim_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.dkim_registry__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__creator_hat_set]
+description = "`CreatorHatSet(uint256,bool)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CreatorHatSet(uint256,bool) event"
+
+[table.education_hub__creator_hat_set.columns]
+enabled = "The `enabled` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__creator_hat_set.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.education_hub__executor_set]
+description = "`ExecutorSet(address)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ExecutorSet(address) event"
+
+[table.education_hub__executor_set.columns]
+newExecutor = "The `newExecutor` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__hat_toggled]
+description = "`HatToggled(uint256,bool)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatToggled(uint256,bool) event"
+
+[table.education_hub__hat_toggled.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__hat_toggled.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.education_hub__hats_set]
+description = "`HatsSet(address)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatsSet(address) event"
+
+[table.education_hub__hats_set.columns]
+newHats = "The `newHats` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__initialized]
+description = "`Initialized(uint64)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.education_hub__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__member_hat_set]
+description = "`MemberHatSet(uint256,bool)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per MemberHatSet(uint256,bool) event"
+
+[table.education_hub__member_hat_set.columns]
+enabled = "The `enabled` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__member_hat_set.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.education_hub__module_completed]
+description = "`ModuleCompleted(uint256,address)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ModuleCompleted(uint256,address) event"
+
+[table.education_hub__module_completed.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+learner = "The `learner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__module_completed.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.education_hub__module_created]
+description = "`ModuleCreated(uint256,bytes,bytes32,uint256)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ModuleCreated(uint256,bytes,bytes32,uint256) event"
+
+[table.education_hub__module_created.columns]
+contentHash = "The `contentHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+payout = "The `payout` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__module_created.footguns]
+big_ints = [
+    "id",
+    "payout",
+]
+overflows_dec = [
+    "id",
+    "payout",
+]
+
+[table.education_hub__module_removed]
+description = "`ModuleRemoved(uint256)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ModuleRemoved(uint256) event"
+
+[table.education_hub__module_removed.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__module_removed.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.education_hub__module_updated]
+description = "`ModuleUpdated(uint256,bytes,bytes32,uint256)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ModuleUpdated(uint256,bytes,bytes32,uint256) event"
+
+[table.education_hub__module_updated.columns]
+contentHash = "The `contentHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+payout = "The `payout` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__module_updated.footguns]
+big_ints = [
+    "id",
+    "payout",
+]
+overflows_dec = [
+    "id",
+    "payout",
+]
+
+[table.education_hub__paused]
+description = "`Paused(address)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Paused(address) event"
+
+[table.education_hub__paused.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__token_set]
+description = "`TokenSet(address)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TokenSet(address) event"
+
+[table.education_hub__token_set.columns]
+newToken = "The `newToken` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.education_hub__unpaused]
+description = "`Unpaused(address)` events emitted by the `education_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Unpaused(address) event"
+
+[table.education_hub__unpaused.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__bulk_wearer_eligibility_updated]
+description = "`BulkWearerEligibilityUpdated(address[],uint256,bool,bool,address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per BulkWearerEligibilityUpdated(address[],uint256,bool,bool,address) event"
+
+[table.eligibility_module__bulk_wearer_eligibility_updated.columns]
+admin = "The `admin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+eligible = "The `eligible` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+standing = "The `standing` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+wearers = "The `wearers` address[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__bulk_wearer_eligibility_updated.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__default_eligibility_updated]
+description = "`DefaultEligibilityUpdated(uint256,bool,bool,address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per DefaultEligibilityUpdated(uint256,bool,bool,address) event"
+
+[table.eligibility_module__default_eligibility_updated.columns]
+admin = "The `admin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+eligible = "The `eligible` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+standing = "The `standing` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__default_eligibility_updated.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__eligibility_module_admin_hat_set]
+description = "`EligibilityModuleAdminHatSet(uint256)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per EligibilityModuleAdminHatSet(uint256) event"
+
+[table.eligibility_module__eligibility_module_admin_hat_set.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__eligibility_module_admin_hat_set.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__eligibility_module_initialized]
+description = "`EligibilityModuleInitialized(address,address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per EligibilityModuleInitialized(address,address) event"
+
+[table.eligibility_module__eligibility_module_initialized.columns]
+hatsContract = "The `hatsContract` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+superAdmin = "The `superAdmin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__governance_admin_set]
+description = "`GovernanceAdminSet(address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per GovernanceAdminSet(address) event"
+
+[table.eligibility_module__governance_admin_set.columns]
+governanceAdmin = "The `governanceAdmin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__hat_claimed]
+description = "`HatClaimed(address,uint256)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatClaimed(address,uint256) event"
+
+[table.eligibility_module__hat_claimed.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+wearer = "The `wearer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__hat_claimed.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__hat_created_with_eligibility]
+description = "`HatCreatedWithEligibility(address,uint256,uint256,bool,bool,uint256)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatCreatedWithEligibility(address,uint256,uint256,bool,bool,uint256) event"
+
+[table.eligibility_module__hat_created_with_eligibility.columns]
+creator = "The `creator` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+defaultEligible = "The `defaultEligible` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+defaultStanding = "The `defaultStanding` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+mintedCount = "The `mintedCount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newHatId = "The `newHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+parentHatId = "The `parentHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__hat_created_with_eligibility.footguns]
+big_ints = [
+    "parentHatId",
+    "newHatId",
+    "mintedCount",
+]
+overflows_dec = [
+    "parentHatId",
+    "newHatId",
+    "mintedCount",
+]
+
+[table.eligibility_module__hat_metadata_updated]
+description = "`HatMetadataUpdated(uint256,string,bytes32)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatMetadataUpdated(uint256,string,bytes32) event"
+
+[table.eligibility_module__hat_metadata_updated.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+metadataCID = "The `metadataCID` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+name = "The `name` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__hat_metadata_updated.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__initialized]
+description = "`Initialized(uint64)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.eligibility_module__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__new_user_vouching_restricted_event]
+description = "`NewUserVouchingRestrictedEvent(address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per NewUserVouchingRestrictedEvent(address) event"
+
+[table.eligibility_module__new_user_vouching_restricted_event.columns]
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__new_user_vouching_restricted_event.footguns]
+reserved_words = ["user"]
+
+[table.eligibility_module__paused]
+description = "`Paused(address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Paused(address) event"
+
+[table.eligibility_module__paused.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__role_application_submitted]
+description = "`RoleApplicationSubmitted(uint256,address,bytes32)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RoleApplicationSubmitted(uint256,address,bytes32) event"
+
+[table.eligibility_module__role_application_submitted.columns]
+applicant = "The `applicant` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+applicationHash = "The `applicationHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__role_application_submitted.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__role_application_withdrawn]
+description = "`RoleApplicationWithdrawn(uint256,address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RoleApplicationWithdrawn(uint256,address) event"
+
+[table.eligibility_module__role_application_withdrawn.columns]
+applicant = "The `applicant` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__role_application_withdrawn.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__super_admin_transferred]
+description = "`SuperAdminTransferred(address,address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SuperAdminTransferred(address,address) event"
+
+[table.eligibility_module__super_admin_transferred.columns]
+newSuperAdmin = "The `newSuperAdmin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+oldSuperAdmin = "The `oldSuperAdmin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__unpaused]
+description = "`Unpaused(address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Unpaused(address) event"
+
+[table.eligibility_module__unpaused.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__user_join_time_set]
+description = "`UserJoinTimeSet(address,uint256)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per UserJoinTimeSet(address,uint256) event"
+
+[table.eligibility_module__user_join_time_set.columns]
+joinTime = "The `joinTime` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__user_join_time_set.footguns]
+reserved_words = ["user"]
+big_ints = ["joinTime"]
+overflows_dec = ["joinTime"]
+
+[table.eligibility_module__vouch_config_set]
+description = "`VouchConfigSet(uint256,uint32,uint256,bool,bool)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per VouchConfigSet(uint256,uint32,uint256,bool,bool) event"
+
+[table.eligibility_module__vouch_config_set.columns]
+combineWithHierarchy = "The `combineWithHierarchy` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+enabled = "The `enabled` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+membershipHatId = "The `membershipHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+quorum = "The `quorum` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__vouch_config_set.footguns]
+big_ints = [
+    "hatId",
+    "membershipHatId",
+]
+overflows_dec = [
+    "hatId",
+    "membershipHatId",
+]
+
+[table.eligibility_module__vouch_revoked]
+description = "`VouchRevoked(address,address,uint256,uint32)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per VouchRevoked(address,address,uint256,uint32) event"
+
+[table.eligibility_module__vouch_revoked.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newCount = "The `newCount` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+voucher = "The `voucher` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+wearer = "The `wearer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__vouch_revoked.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__vouched]
+description = "One member vouching for another's eligibility for a role — the social-graph layer of role assignment."
+grain = "one row per vouch"
+
+[table.eligibility_module__vouched.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newCount = "The `newCount` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+voucher = "The `voucher` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+wearer = "The `wearer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__vouched.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.eligibility_module__vouching_rate_limit_exceeded_event]
+description = "`VouchingRateLimitExceededEvent(address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per VouchingRateLimitExceededEvent(address) event"
+
+[table.eligibility_module__vouching_rate_limit_exceeded_event.columns]
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__vouching_rate_limit_exceeded_event.footguns]
+reserved_words = ["user"]
+
+[table.eligibility_module__wearer_eligibility_updated]
+description = "`WearerEligibilityUpdated(address,uint256,bool,bool,address)` events emitted by the `eligibility_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per WearerEligibilityUpdated(address,uint256,bool,bool,address) event"
+
+[table.eligibility_module__wearer_eligibility_updated.columns]
+admin = "The `admin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+eligible = "The `eligible` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+standing = "The `standing` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+wearer = "The `wearer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.eligibility_module__wearer_eligibility_updated.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.executor__batch_executed]
+description = "`BatchExecuted(uint256,uint256)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per BatchExecuted(uint256,uint256) event"
+
+[table.executor__batch_executed.columns]
+calls = "The `calls` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+proposalId = "The `proposalId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__batch_executed.footguns]
+big_ints = [
+    "proposalId",
+    "calls",
+]
+overflows_dec = [
+    "proposalId",
+    "calls",
+]
+
+[table.executor__call_executed]
+description = "`CallExecuted(uint256,uint256,address,uint256)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CallExecuted(uint256,uint256,address,uint256) event"
+
+[table.executor__call_executed.columns]
+index = "The `index` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+proposalId = "The `proposalId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+target = "The `target` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+value = "The `value` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__call_executed.footguns]
+reserved_words = ["index"]
+big_ints = [
+    "proposalId",
+    "index",
+    "value",
+]
+overflows_dec = [
+    "proposalId",
+    "index",
+    "value",
+]
+
+[table.executor__caller_change_cancelled]
+description = "`CallerChangeCancelled()` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CallerChangeCancelled() event"
+
+[table.executor__caller_change_proposed]
+description = "`CallerChangeProposed(address,uint256)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CallerChangeProposed(address,uint256) event"
+
+[table.executor__caller_change_proposed.columns]
+effectiveAt = "The `effectiveAt` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newCaller = "The `newCaller` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__caller_change_proposed.footguns]
+big_ints = ["effectiveAt"]
+overflows_dec = ["effectiveAt"]
+
+[table.executor__caller_set]
+description = "`CallerSet(address)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CallerSet(address) event"
+
+[table.executor__caller_set.columns]
+caller = "The `caller` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__hat_minter_authorized]
+description = "`HatMinterAuthorized(address,bool)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatMinterAuthorized(address,bool) event"
+
+[table.executor__hat_minter_authorized.columns]
+authorized = "The `authorized` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+minter = "The `minter` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__hats_minted]
+description = "`HatsMinted(address,uint256[])` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatsMinted(address,uint256[]) event"
+
+[table.executor__hats_minted.columns]
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__hats_minted.footguns]
+reserved_words = ["user"]
+
+[table.executor__hats_set]
+description = "`HatsSet(address)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatsSet(address) event"
+
+[table.executor__hats_set.columns]
+hats = "The `hats` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__initialized]
+description = "`Initialized(uint64)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.executor__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.executor__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__paused]
+description = "`Paused(address)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Paused(address) event"
+
+[table.executor__paused.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__swept]
+description = "`Swept(address,uint256)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Swept(address,uint256) event"
+
+[table.executor__swept.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+to = "The `to` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.executor__swept.footguns]
+reserved_words = ["to"]
+big_ints = ["amount"]
+overflows_dec = ["amount"]
+
+[table.executor__unpaused]
+description = "`Unpaused(address)` events emitted by the `executor` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Unpaused(address) event"
+
+[table.executor__unpaused.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.gov_factory__module_deployed]
+description = "`ModuleDeployed(bytes32,bytes32,address,address,bool,address)` events emitted by the `gov_factory` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ModuleDeployed(bytes32,bytes32,address,address,bool,address) event"
+
+[table.gov_factory__module_deployed.columns]
+autoUpgrade = "The `autoUpgrade` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+beacon = "The `beacon` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+owner = "The `owner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+proxy = "The `proxy` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeId = "The `typeId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hats__hat_status_changed]
+description = "`HatStatusChanged(uint256,bool)` events emitted by the `hats` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatStatusChanged(uint256,bool) event"
+
+[table.hats__hat_status_changed.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newStatus = "The `newStatus` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hats__hat_status_changed.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.hats__transfer_batch]
+description = "`TransferBatch(address,address,address,uint256[],uint256[])` events emitted by the `hats` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TransferBatch(address,address,address,uint256[],uint256[]) event"
+
+[table.hats__transfer_batch.columns]
+from = "The `from` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+ids = "The `ids` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+operator = "The `operator` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+to = "The `to` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+values = "The `values` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hats__transfer_batch.footguns]
+reserved_words = [
+    "from",
+    "to",
+    "values",
+]
+
+[table.hats__transfer_single]
+description = "Hats Protocol role assignment. A mint is from = 0x0; a burn/revoke is to = 0x0. The largest table in this nest and the source of truth for who holds which role — `id` is the hat ID, not an ERC-20 amount."
+grain = "one row per role grant or revocation"
+
+[table.hats__transfer_single.columns]
+from = "The `from` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+operator = "The `operator` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+to = "The `to` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+value = "The `value` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hats__transfer_single.footguns]
+reserved_words = [
+    "from",
+    "to",
+]
+big_ints = [
+    "id",
+    "value",
+]
+overflows_dec = [
+    "id",
+    "value",
+]
+
+[table.hybrid_voting__classes_replaced]
+description = "`ClassesReplaced(uint256,bytes32,(uint8,uint8,bool,uint256,address,uint256[])[],uint64)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ClassesReplaced(uint256,bytes32,(uint8,uint8,bool,uint256,address,uint256[])[],uint64) event"
+
+[table.hybrid_voting__classes_replaced.columns]
+classes = "The `classes` tuple[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+classesHash = "The `classesHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+timestamp = "The `timestamp` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+version = "The `version` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__classes_replaced.footguns]
+big_ints = ["version"]
+overflows_dec = ["version"]
+
+[table.hybrid_voting__executor_updated]
+description = "`ExecutorUpdated(address)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ExecutorUpdated(address) event"
+
+[table.hybrid_voting__executor_updated.columns]
+newExec = "The `newExec` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__hat_set]
+description = "`HatSet(uint8,uint256,bool)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatSet(uint8,uint256,bool) event"
+
+[table.hybrid_voting__hat_set.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hat = "The `hat` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatType = "The `hatType` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__hat_set.footguns]
+big_ints = ["hat"]
+overflows_dec = ["hat"]
+
+[table.hybrid_voting__hat_toggled]
+description = "`HatToggled(uint256,bool)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatToggled(uint256,bool) event"
+
+[table.hybrid_voting__hat_toggled.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__hat_toggled.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.hybrid_voting__initialized]
+description = "`Initialized(uint64)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.hybrid_voting__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__new_hat_proposal]
+description = "`NewHatProposal(uint256,bytes,bytes32,uint8,uint64,uint64,uint256[])` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per NewHatProposal(uint256,bytes,bytes32,uint8,uint64,uint64,uint256[]) event"
+
+[table.hybrid_voting__new_hat_proposal.columns]
+created = "The `created` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+descriptionHash = "The `descriptionHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+endTs = "The `endTs` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+numOptions = "The `numOptions` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__new_hat_proposal.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.hybrid_voting__new_proposal]
+description = "A proposal opened on the hybrid (token + participation weighted) voting module."
+grain = "one row per proposal"
+
+[table.hybrid_voting__new_proposal.columns]
+created = "The `created` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+descriptionHash = "The `descriptionHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+endTs = "The `endTs` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+numOptions = "The `numOptions` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__new_proposal.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.hybrid_voting__proposal_executed]
+description = "`ProposalExecuted(uint256,uint256,uint256)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProposalExecuted(uint256,uint256,uint256) event"
+
+[table.hybrid_voting__proposal_executed.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+numCalls = "The `numCalls` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+winningIdx = "The `winningIdx` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__proposal_executed.footguns]
+big_ints = [
+    "id",
+    "winningIdx",
+    "numCalls",
+]
+overflows_dec = [
+    "id",
+    "winningIdx",
+    "numCalls",
+]
+
+[table.hybrid_voting__proposal_execution_failed]
+description = "`ProposalExecutionFailed(uint256,uint256,bytes)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProposalExecutionFailed(uint256,uint256,bytes) event"
+
+[table.hybrid_voting__proposal_execution_failed.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+reason = "The `reason` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+winningIdx = "The `winningIdx` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__proposal_execution_failed.footguns]
+big_ints = [
+    "id",
+    "winningIdx",
+]
+overflows_dec = [
+    "id",
+    "winningIdx",
+]
+
+[table.hybrid_voting__quorum_set]
+description = "`QuorumSet(uint32)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per QuorumSet(uint32) event"
+
+[table.hybrid_voting__quorum_set.columns]
+quorum = "The `quorum` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__threshold_pct_set]
+description = "`ThresholdPctSet(uint8)` events emitted by the `hybrid_voting` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ThresholdPctSet(uint8) event"
+
+[table.hybrid_voting__threshold_pct_set.columns]
+pct = "The `pct` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__vote_cast]
+description = "A vote on a hybrid proposal. NOTE: this is a different event shape from dd_voting__vote_cast — it carries per-class weights. The two are deliberately separate tables; do not UNION them without aligning columns."
+grain = "one row per vote"
+
+[table.hybrid_voting__vote_cast.columns]
+classRawPowers = "The `classRawPowers` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+idxs = "The `idxs` uint8[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+timestamp = "The `timestamp` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+voter = "The `voter` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+weights = "The `weights` uint8[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__vote_cast.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.hybrid_voting__winner]
+description = "The resolved outcome of a hybrid proposal."
+grain = "one row per resolved proposal"
+
+[table.hybrid_voting__winner.columns]
+executed = "The `executed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+timestamp = "The `timestamp` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+valid = "The `valid` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+winningIdx = "The `winningIdx` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.hybrid_voting__winner.footguns]
+big_ints = [
+    "id",
+    "winningIdx",
+]
+overflows_dec = [
+    "id",
+    "winningIdx",
+]
+
+[table.org_deployer__initial_wearers_assigned]
+description = "`InitialWearersAssigned(bytes32,address,address[],uint256[])` events emitted by the `org_deployer` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per InitialWearersAssigned(bytes32,address,address[],uint256[]) event"
+
+[table.org_deployer__initial_wearers_assigned.columns]
+eligibilityModule = "The `eligibilityModule` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+wearers = "The `wearers` address[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_deployer__initialized]
+description = "`Initialized(uint64)` events emitted by the `org_deployer` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.org_deployer__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_deployer__org_deployed]
+description = "A new organisation and its ten governance modules, all in one event. Each module address is its own named column (hybridVoting, taskManager, …)."
+grain = "one row per organisation"
+
+[table.org_deployer__org_deployed.columns]
+directDemocracyVoting = "The `directDemocracyVoting` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+educationHub = "The `educationHub` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+eligibilityModule = "The `eligibilityModule` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+executor = "The `executor` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hybridVoting = "The `hybridVoting` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+participationToken = "The `participationToken` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+paymentManager = "The `paymentManager` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+quickJoin = "The `quickJoin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+roleHatIds = "The `roleHatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+taskManager = "The `taskManager` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+toggleModule = "The `toggleModule` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+topHatId = "The `topHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_deployer__org_deployed.footguns]
+big_ints = ["topHatId"]
+overflows_dec = ["topHatId"]
+
+[table.org_deployer__roles_created]
+description = "`RolesCreated(bytes32,uint256[],string[],string[],bytes32[],bool[])` events emitted by the `org_deployer` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RolesCreated(bytes32,uint256[],string[],string[],bytes32[],bool[]) event"
+
+[table.org_deployer__roles_created.columns]
+canVote = "The `canVote` bool[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+images = "The `images` string[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+metadataCIDs = "The `metadataCIDs` bytes32[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+names = "The `names` string[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_registry__contract_registered]
+description = "Every module proxy registered against an org, with the SwitchableBeacon fronting it. This is the factory event that discovers the switchable_beacon children."
+grain = "one row per (org, module)"
+
+[table.org_registry__contract_registered.columns]
+autoUpgrade = "The `autoUpgrade` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+beacon = "The `beacon` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+contractId = "The `contractId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+owner = "The `owner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+proxy = "The `proxy` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeId = "The `typeId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_registry__hats_tree_registered]
+description = "`HatsTreeRegistered(bytes32,uint256,uint256[])` events emitted by the `org_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatsTreeRegistered(bytes32,uint256,uint256[]) event"
+
+[table.org_registry__hats_tree_registered.columns]
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+roleHatIds = "The `roleHatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+topHatId = "The `topHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_registry__hats_tree_registered.footguns]
+big_ints = ["topHatId"]
+overflows_dec = ["topHatId"]
+
+[table.org_registry__initialized]
+description = "`Initialized(uint64)` events emitted by the `org_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.org_registry__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_registry__meta_updated]
+description = "`MetaUpdated(bytes32,bytes,bytes32)` events emitted by the `org_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per MetaUpdated(bytes32,bytes,bytes32) event"
+
+[table.org_registry__meta_updated.columns]
+newMetadataHash = "The `newMetadataHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newName = "The `newName` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_registry__org_metadata_admin_hat_set]
+description = "`OrgMetadataAdminHatSet(bytes32,uint256)` events emitted by the `org_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrgMetadataAdminHatSet(bytes32,uint256) event"
+
+[table.org_registry__org_metadata_admin_hat_set.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_registry__org_metadata_admin_hat_set.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.org_registry__org_registered]
+description = "An org's canonical registry entry. `name` is bytes-encoded, not a string — decode it rather than comparing it directly."
+grain = "one row per organisation"
+
+[table.org_registry__org_registered.columns]
+executor = "The `executor` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+metadataHash = "The `metadataHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+name = "The `name` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.org_registry__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `org_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.org_registry__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__approval]
+description = "`Approval(address,address,uint256)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Approval(address,address,uint256) event"
+
+[table.participation_token__approval.columns]
+owner = "The `owner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+spender = "The `spender` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+value = "The `value` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__approval.footguns]
+big_ints = ["value"]
+overflows_dec = ["value"]
+
+[table.participation_token__approver_hat_set]
+description = "`ApproverHatSet(uint256,bool)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ApproverHatSet(uint256,bool) event"
+
+[table.participation_token__approver_hat_set.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hat = "The `hat` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__approver_hat_set.footguns]
+big_ints = ["hat"]
+overflows_dec = ["hat"]
+
+[table.participation_token__delegate_changed]
+description = "`DelegateChanged(address,address,address)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per DelegateChanged(address,address,address) event"
+
+[table.participation_token__delegate_changed.columns]
+delegator = "The `delegator` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+fromDelegate = "The `fromDelegate` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+toDelegate = "The `toDelegate` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__delegate_votes_changed]
+description = "`DelegateVotesChanged(address,uint256,uint256)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per DelegateVotesChanged(address,uint256,uint256) event"
+
+[table.participation_token__delegate_votes_changed.columns]
+delegate = "The `delegate` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newVotes = "The `newVotes` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousVotes = "The `previousVotes` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__delegate_votes_changed.footguns]
+big_ints = [
+    "previousVotes",
+    "newVotes",
+]
+overflows_dec = [
+    "previousVotes",
+    "newVotes",
+]
+
+[table.participation_token__e_i_p712_domain_changed]
+description = "`EIP712DomainChanged()` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per EIP712DomainChanged() event"
+
+[table.participation_token__education_hub_set]
+description = "`EducationHubSet(address)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per EducationHubSet(address) event"
+
+[table.participation_token__education_hub_set.columns]
+educationHub = "The `educationHub` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__hat_toggled]
+description = "`HatToggled(uint256,bool)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatToggled(uint256,bool) event"
+
+[table.participation_token__hat_toggled.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__hat_toggled.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.participation_token__initialized]
+description = "`Initialized(uint64)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.participation_token__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__member_hat_set]
+description = "`MemberHatSet(uint256,bool)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per MemberHatSet(uint256,bool) event"
+
+[table.participation_token__member_hat_set.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hat = "The `hat` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__member_hat_set.footguns]
+big_ints = ["hat"]
+overflows_dec = ["hat"]
+
+[table.participation_token__name_set]
+description = "`NameSet(string)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per NameSet(string) event"
+
+[table.participation_token__name_set.columns]
+newName = "The `newName` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__request_approved]
+description = "`RequestApproved(uint256,address)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RequestApproved(uint256,address) event"
+
+[table.participation_token__request_approved.columns]
+approver = "The `approver` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__request_approved.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.participation_token__request_cancelled]
+description = "`RequestCancelled(uint256,address)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RequestCancelled(uint256,address) event"
+
+[table.participation_token__request_cancelled.columns]
+caller = "The `caller` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__request_cancelled.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.participation_token__requested]
+description = "`Requested(uint256,address,uint96,string)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Requested(uint256,address,uint96,string) event"
+
+[table.participation_token__requested.columns]
+amount = "The `amount` uint96 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+ipfsHash = "The `ipfsHash` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+requester = "The `requester` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__requested.footguns]
+big_ints = [
+    "id",
+    "amount",
+]
+overflows_dec = ["id"]
+
+[table.participation_token__symbol_set]
+description = "`SymbolSet(string)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SymbolSet(string) event"
+
+[table.participation_token__symbol_set.columns]
+newSymbol = "The `newSymbol` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__task_manager_set]
+description = "`TaskManagerSet(address)` events emitted by the `participation_token` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskManagerSet(address) event"
+
+[table.participation_token__task_manager_set.columns]
+taskManager = "The `taskManager` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
 [table.participation_token__transfer]
 description = "Non-transferable participation-token movement — minted for completed work, not traded. A mint is from = 0x0."
 grain = "one row per token movement"
 
-[table.paymaster_hub__usage_increased]
-description = "Gas sponsored on an org's behalf. The main cost-tracking table."
-grain = "one row per sponsored operation batch"
+[table.participation_token__transfer.columns]
+from = "The `from` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+to = "The `to` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+value = "The `value` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.participation_token__transfer.footguns]
+reserved_words = [
+    "from",
+    "to",
+]
+big_ints = ["value"]
+overflows_dec = ["value"]
+
+[table.paymaster_hub__budget_set]
+description = "`BudgetSet(bytes32,bytes32,uint128,uint32,uint32)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per BudgetSet(bytes32,bytes32,uint128,uint32,uint32) event"
+
+[table.paymaster_hub__budget_set.columns]
+capPerEpoch = "The `capPerEpoch` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+epochLen = "The `epochLen` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+epochStart = "The `epochStart` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+subjectKey = "The `subjectKey` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__budget_set.footguns]
+big_ints = ["capPerEpoch"]
+
+[table.paymaster_hub__deposit_increase]
+description = "`DepositIncrease(uint256,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per DepositIncrease(uint256,uint256) event"
+
+[table.paymaster_hub__deposit_increase.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newDeposit = "The `newDeposit` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__deposit_increase.footguns]
+big_ints = [
+    "amount",
+    "newDeposit",
+]
+overflows_dec = [
+    "amount",
+    "newDeposit",
+]
+
+[table.paymaster_hub__fee_caps_set]
+description = "`FeeCapsSet(bytes32,uint256,uint256,uint32,uint32,uint32)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per FeeCapsSet(bytes32,uint256,uint256,uint32,uint32,uint32) event"
+
+[table.paymaster_hub__fee_caps_set.columns]
+maxCallGas = "The `maxCallGas` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxFeePerGas = "The `maxFeePerGas` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxPreVerificationGas = "The `maxPreVerificationGas` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxPriorityFeePerGas = "The `maxPriorityFeePerGas` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxVerificationGas = "The `maxVerificationGas` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__fee_caps_set.footguns]
+big_ints = [
+    "maxFeePerGas",
+    "maxPriorityFeePerGas",
+]
+overflows_dec = [
+    "maxFeePerGas",
+    "maxPriorityFeePerGas",
+]
+
+[table.paymaster_hub__grace_period_config_updated]
+description = "`GracePeriodConfigUpdated(uint32,uint128,uint128)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per GracePeriodConfigUpdated(uint32,uint128,uint128) event"
+
+[table.paymaster_hub__grace_period_config_updated.columns]
+initialGraceDays = "The `initialGraceDays` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxSpendDuringGrace = "The `maxSpendDuringGrace` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+minDepositRequired = "The `minDepositRequired` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__grace_period_config_updated.footguns]
+big_ints = [
+    "maxSpendDuringGrace",
+    "minDepositRequired",
+]
+
+[table.paymaster_hub__initialized]
+description = "`Initialized(uint64)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.paymaster_hub__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__onboarding_account_created]
+description = "`OnboardingAccountCreated(address,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OnboardingAccountCreated(address,uint256) event"
+
+[table.paymaster_hub__onboarding_account_created.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+gasCost = "The `gasCost` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__onboarding_account_created.footguns]
+big_ints = ["gasCost"]
+overflows_dec = ["gasCost"]
+
+[table.paymaster_hub__onboarding_config_updated]
+description = "`OnboardingConfigUpdated(uint128,uint128,bool,address)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OnboardingConfigUpdated(uint128,uint128,bool,address) event"
+
+[table.paymaster_hub__onboarding_config_updated.columns]
+accountRegistry = "The `accountRegistry` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+dailyCreationLimit = "The `dailyCreationLimit` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+enabled = "The `enabled` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxGasPerCreation = "The `maxGasPerCreation` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__onboarding_config_updated.footguns]
+big_ints = [
+    "maxGasPerCreation",
+    "dailyCreationLimit",
+]
+
+[table.paymaster_hub__operator_hat_set]
+description = "`OperatorHatSet(bytes32,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OperatorHatSet(bytes32,uint256) event"
+
+[table.paymaster_hub__operator_hat_set.columns]
+operatorHatId = "The `operatorHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__operator_hat_set.footguns]
+big_ints = ["operatorHatId"]
+overflows_dec = ["operatorHatId"]
+
+[table.paymaster_hub__org_banned_from_solidarity]
+description = "`OrgBannedFromSolidarity(bytes32,bool)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrgBannedFromSolidarity(bytes32,bool) event"
+
+[table.paymaster_hub__org_banned_from_solidarity.columns]
+banned = "The `banned` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__org_deploy_config_updated]
+description = "`OrgDeployConfigUpdated(uint128,uint128,uint8,bool,address)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrgDeployConfigUpdated(uint128,uint128,uint8,bool,address) event"
+
+[table.paymaster_hub__org_deploy_config_updated.columns]
+dailyDeployLimit = "The `dailyDeployLimit` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+enabled = "The `enabled` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxDeploysPerAccount = "The `maxDeploysPerAccount` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxGasPerDeploy = "The `maxGasPerDeploy` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgDeployer = "The `orgDeployer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__org_deploy_config_updated.footguns]
+big_ints = [
+    "maxGasPerDeploy",
+    "dailyDeployLimit",
+]
+
+[table.paymaster_hub__org_deployment_sponsored]
+description = "`OrgDeploymentSponsored(address,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrgDeploymentSponsored(address,uint256) event"
+
+[table.paymaster_hub__org_deployment_sponsored.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+gasCost = "The `gasCost` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__org_deployment_sponsored.footguns]
+big_ints = ["gasCost"]
+overflows_dec = ["gasCost"]
+
+[table.paymaster_hub__org_deposit_received]
+description = "`OrgDepositReceived(bytes32,address,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrgDepositReceived(bytes32,address,uint256) event"
+
+[table.paymaster_hub__org_deposit_received.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+from = "The `from` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__org_deposit_received.footguns]
+reserved_words = ["from"]
+big_ints = ["amount"]
+overflows_dec = ["amount"]
+
+[table.paymaster_hub__org_registered]
+description = "`OrgRegistered(bytes32,uint256,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrgRegistered(bytes32,uint256,uint256) event"
+
+[table.paymaster_hub__org_registered.columns]
+adminHatId = "The `adminHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+operatorHatId = "The `operatorHatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__org_registered.footguns]
+big_ints = [
+    "adminHatId",
+    "operatorHatId",
+]
+overflows_dec = [
+    "adminHatId",
+    "operatorHatId",
+]
+
+[table.paymaster_hub__org_spending_recorded]
+description = "`OrgSpendingRecorded(bytes32,uint256,uint256,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrgSpendingRecorded(bytes32,uint256,uint256,uint256) event"
+
+[table.paymaster_hub__org_spending_recorded.columns]
+fromDeposits = "The `fromDeposits` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+fromSolidarity = "The `fromSolidarity` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+solidarityFee = "The `solidarityFee` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__org_spending_recorded.footguns]
+big_ints = [
+    "fromDeposits",
+    "fromSolidarity",
+    "solidarityFee",
+]
+overflows_dec = [
+    "fromDeposits",
+    "fromSolidarity",
+    "solidarityFee",
+]
+
+[table.paymaster_hub__pause_set]
+description = "`PauseSet(bytes32,bool)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per PauseSet(bytes32,bool) event"
+
+[table.paymaster_hub__pause_set.columns]
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+paused = "The `paused` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__paymaster_initialized]
+description = "`PaymasterInitialized(address,address,address)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per PaymasterInitialized(address,address,address) event"
+
+[table.paymaster_hub__paymaster_initialized.columns]
+entryPoint = "The `entryPoint` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hats = "The `hats` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+poaManager = "The `poaManager` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
 [table.paymaster_hub__rule_set]
 description = "A sponsorship rule: which (target, selector) pairs the paymaster will fund for an org. The busiest paymaster table."
 grain = "one row per rule change"
 
-# --- factory-discovered ------------------------------------------------------
+[table.paymaster_hub__rule_set.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+maxCallGasHint = "The `maxCallGasHint` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+selector = "The `selector` bytes4 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+target = "The `target` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__solidarity_distribution_paused]
+description = "`SolidarityDistributionPaused()` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SolidarityDistributionPaused() event"
+
+[table.paymaster_hub__solidarity_distribution_unpaused]
+description = "`SolidarityDistributionUnpaused()` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SolidarityDistributionUnpaused() event"
+
+[table.paymaster_hub__solidarity_donation_received]
+description = "`SolidarityDonationReceived(address,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SolidarityDonationReceived(address,uint256) event"
+
+[table.paymaster_hub__solidarity_donation_received.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+from = "The `from` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__solidarity_donation_received.footguns]
+reserved_words = ["from"]
+big_ints = ["amount"]
+overflows_dec = ["amount"]
+
+[table.paymaster_hub__solidarity_fee_collected]
+description = "`SolidarityFeeCollected(bytes32,uint256)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SolidarityFeeCollected(bytes32,uint256) event"
+
+[table.paymaster_hub__solidarity_fee_collected.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__solidarity_fee_collected.footguns]
+big_ints = ["amount"]
+overflows_dec = ["amount"]
+
+[table.paymaster_hub__upgraded]
+description = "`Upgraded(address)` events emitted by the `paymaster_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Upgraded(address) event"
+
+[table.paymaster_hub__upgraded.columns]
+implementation = "The `implementation` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__usage_increased]
+description = "Gas sponsored on an org's behalf. The main cost-tracking table."
+grain = "one row per sponsored operation batch"
+
+[table.paymaster_hub__usage_increased.columns]
+delta = "The `delta` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+epochStart = "The `epochStart` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgId = "The `orgId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+subjectKey = "The `subjectKey` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+usedInEpoch = "The `usedInEpoch` uint128 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.paymaster_hub__usage_increased.footguns]
+big_ints = [
+    "delta",
+    "usedInEpoch",
+]
+overflows_dec = ["delta"]
+
+[table.payment_manager__distribution_claimed]
+description = "`DistributionClaimed(uint256,address,uint256)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per DistributionClaimed(uint256,address,uint256) event"
+
+[table.payment_manager__distribution_claimed.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+claimer = "The `claimer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+distributionId = "The `distributionId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.payment_manager__distribution_claimed.footguns]
+big_ints = [
+    "distributionId",
+    "amount",
+]
+overflows_dec = [
+    "distributionId",
+    "amount",
+]
+
+[table.payment_manager__distribution_created]
+description = "`DistributionCreated(uint256,address,uint256,uint256,bytes32)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per DistributionCreated(uint256,address,uint256,uint256,bytes32) event"
+
+[table.payment_manager__distribution_created.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+checkpointBlock = "The `checkpointBlock` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+distributionId = "The `distributionId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+merkleRoot = "The `merkleRoot` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+token = "The `token` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.payment_manager__distribution_created.footguns]
+big_ints = [
+    "distributionId",
+    "amount",
+    "checkpointBlock",
+]
+overflows_dec = [
+    "distributionId",
+    "amount",
+    "checkpointBlock",
+]
+
+[table.payment_manager__distribution_finalized]
+description = "`DistributionFinalized(uint256,uint256)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per DistributionFinalized(uint256,uint256) event"
+
+[table.payment_manager__distribution_finalized.columns]
+distributionId = "The `distributionId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+unclaimedAmount = "The `unclaimedAmount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.payment_manager__distribution_finalized.footguns]
+big_ints = [
+    "distributionId",
+    "unclaimedAmount",
+]
+overflows_dec = [
+    "distributionId",
+    "unclaimedAmount",
+]
+
+[table.payment_manager__initialized]
+description = "`Initialized(uint64)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.payment_manager__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.payment_manager__opt_out_toggled]
+description = "`OptOutToggled(address,bool)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OptOutToggled(address,bool) event"
+
+[table.payment_manager__opt_out_toggled.columns]
+optedOut = "The `optedOut` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.payment_manager__opt_out_toggled.footguns]
+reserved_words = ["user"]
+
+[table.payment_manager__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.payment_manager__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.payment_manager__payment_received]
+description = "`PaymentReceived(address,uint256,address)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per PaymentReceived(address,uint256,address) event"
+
+[table.payment_manager__payment_received.columns]
+amount = "The `amount` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+payer = "The `payer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+token = "The `token` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.payment_manager__payment_received.footguns]
+big_ints = ["amount"]
+overflows_dec = ["amount"]
+
+[table.payment_manager__revenue_share_token_set]
+description = "`RevenueShareTokenSet(address)` events emitted by the `payment_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RevenueShareTokenSet(address) event"
+
+[table.payment_manager__revenue_share_token_set.columns]
+token = "The `token` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager__beacon_created]
+description = "A new upgradeable module type registered on the protocol. typeName is the human label ('HybridVoting', 'TaskManager', …); typeId is its keccak key used everywhere else."
+grain = "one row per module type ever registered"
+
+[table.poa_manager__beacon_created.columns]
+beacon = "The `beacon` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+implementation = "The `implementation` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeId = "The `typeId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeName = "The `typeName` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager__beacon_upgraded]
+description = "A module type's implementation was swapped. The protocol's upgrade history — the busiest infra table here."
+grain = "one row per upgrade of one module type"
+
+[table.poa_manager__beacon_upgraded.columns]
+newImplementation = "The `newImplementation` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeId = "The `typeId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+version = "The `version` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager__infrastructure_deployed]
+description = "Fires exactly once, at block 447060027, announcing the six singleton infrastructure addresses. This is why org_deployer/org_registry/paymaster_hub/account_registry are static contracts in this nest rather than factory templates."
+grain = "one row, ever"
+
+[table.poa_manager__infrastructure_deployed.columns]
+globalAccountRegistry = "The `globalAccountRegistry` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+implRegistry = "The `implRegistry` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgDeployer = "The `orgDeployer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+orgRegistry = "The `orgRegistry` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+passkeyAccountFactoryBeacon = "The `passkeyAccountFactoryBeacon` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+paymasterHub = "The `paymasterHub` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `poa_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.poa_manager__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager__registry_updated]
+description = "`RegistryUpdated(address,address)` events emitted by the `poa_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RegistryUpdated(address,address) event"
+
+[table.poa_manager__registry_updated.columns]
+newRegistry = "The `newRegistry` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+oldRegistry = "The `oldRegistry` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__cross_chain_add_type_dispatched]
+description = "`CrossChainAddTypeDispatched(bytes32,string,address)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CrossChainAddTypeDispatched(bytes32,string,address) event"
+
+[table.poa_manager_hub__cross_chain_add_type_dispatched.columns]
+impl = "The `impl` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeId = "The `typeId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeName = "The `typeName` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__cross_chain_admin_call_dispatched]
+description = "`CrossChainAdminCallDispatched(address,bytes)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CrossChainAdminCallDispatched(address,bytes) event"
+
+[table.poa_manager_hub__cross_chain_admin_call_dispatched.columns]
+data = "The `data` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+target = "The `target` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__cross_chain_upgrade_dispatched]
+description = "`CrossChainUpgradeDispatched(bytes32,address,string)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per CrossChainUpgradeDispatched(bytes32,address,string) event"
+
+[table.poa_manager_hub__cross_chain_upgrade_dispatched.columns]
+newImpl = "The `newImpl` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeId = "The `typeId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+version = "The `version` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__ownership_transfer_started]
+description = "`OwnershipTransferStarted(address,address)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferStarted(address,address) event"
+
+[table.poa_manager_hub__ownership_transfer_started.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.poa_manager_hub__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__pause_set]
+description = "`PauseSet(bool)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per PauseSet(bool) event"
+
+[table.poa_manager_hub__pause_set.columns]
+paused = "The `paused` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__satellite_registered]
+description = "`SatelliteRegistered(uint32,address)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SatelliteRegistered(uint32,address) event"
+
+[table.poa_manager_hub__satellite_registered.columns]
+domain = "The `domain` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+satellite = "The `satellite` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.poa_manager_hub__satellite_removed]
+description = "`SatelliteRemoved(uint32)` events emitted by the `poa_manager_hub` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per SatelliteRemoved(uint32) event"
+
+[table.poa_manager_hub__satellite_removed.columns]
+domain = "The `domain` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__addresses_updated]
+description = "`AddressesUpdated(address,address,address)` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per AddressesUpdated(address,address,address) event"
+
+[table.quick_join__addresses_updated.columns]
+hats = "The `hats` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+master = "The `master` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+registry = "The `registry` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__executor_updated]
+description = "`ExecutorUpdated(address)` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ExecutorUpdated(address) event"
+
+[table.quick_join__executor_updated.columns]
+newExecutor = "The `newExecutor` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__hat_toggled]
+description = "`HatToggled(uint256,bool)` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatToggled(uint256,bool) event"
+
+[table.quick_join__hat_toggled.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__hat_toggled.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.quick_join__initialized]
+description = "`Initialized(uint64)` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.quick_join__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__member_hat_ids_updated]
+description = "`MemberHatIdsUpdated(uint256[])` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per MemberHatIdsUpdated(uint256[]) event"
+
+[table.quick_join__member_hat_ids_updated.columns]
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__quick_joined]
+description = "A member joining an org through the QuickJoin flow, receiving their initial hats."
+grain = "one row per join"
+
+[table.quick_join__quick_joined.columns]
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__quick_joined.footguns]
+reserved_words = ["user"]
+
+[table.quick_join__quick_joined_by_master]
+description = "`QuickJoinedByMaster(address,address,uint256[])` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per QuickJoinedByMaster(address,address,uint256[]) event"
+
+[table.quick_join__quick_joined_by_master.columns]
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+master = "The `master` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__quick_joined_by_master.footguns]
+reserved_words = ["user"]
+
+[table.quick_join__quick_joined_with_passkey_by_master]
+description = "`QuickJoinedWithPasskeyByMaster(address,address,bytes32,uint256[])` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per QuickJoinedWithPasskeyByMaster(address,address,bytes32,uint256[]) event"
+
+[table.quick_join__quick_joined_with_passkey_by_master.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+credentialId = "The `credentialId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+master = "The `master` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__register_and_quick_joined]
+description = "`RegisterAndQuickJoined(address,string,uint256[])` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RegisterAndQuickJoined(address,string,uint256[]) event"
+
+[table.quick_join__register_and_quick_joined.columns]
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+user = "The `user` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+username = "The `username` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__register_and_quick_joined.footguns]
+reserved_words = ["user"]
+
+[table.quick_join__register_and_quick_joined_with_passkey]
+description = "`RegisterAndQuickJoinedWithPasskey(address,bytes32,string,uint256[])` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RegisterAndQuickJoinedWithPasskey(address,bytes32,string,uint256[]) event"
+
+[table.quick_join__register_and_quick_joined_with_passkey.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+credentialId = "The `credentialId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+username = "The `username` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__register_and_quick_joined_with_passkey_by_master]
+description = "`RegisterAndQuickJoinedWithPasskeyByMaster(address,address,bytes32,string,uint256[])` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RegisterAndQuickJoinedWithPasskeyByMaster(address,address,bytes32,string,uint256[]) event"
+
+[table.quick_join__register_and_quick_joined_with_passkey_by_master.columns]
+account = "The `account` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+credentialId = "The `credentialId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatIds = "The `hatIds` uint256[] parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+master = "The `master` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+username = "The `username` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.quick_join__universal_factory_updated]
+description = "`UniversalFactoryUpdated(address)` events emitted by the `quick_join` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per UniversalFactoryUpdated(address) event"
+
+[table.quick_join__universal_factory_updated.columns]
+universalFactory = "The `universalFactory` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
 
 [table.switchable_beacon__children]
 description = "The SwitchableBeacon proxies discovered at runtime from org_registry__contract_registered. Ten of them, one per registered module. `parent_address` is always the org registry."
 grain = "one row per discovered beacon"
 
+[table.switchable_beacon__mirror_set]
+description = "`MirrorSet(address)` events emitted by the `switchable_beacon` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per MirrorSet(address) event"
+
+[table.switchable_beacon__mirror_set.columns]
+mirrorBeacon = "The `mirrorBeacon` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
 [table.switchable_beacon__mode_changed]
 description = "A beacon flipping between auto-upgrade (follows the protocol implementation) and pinned (frozen at one implementation) — the per-org upgrade-autonomy switch."
 grain = "one row per mode change"
+
+[table.switchable_beacon__mode_changed.columns]
+mode = "The `mode` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.switchable_beacon__ownership_transfer_started]
+description = "`OwnershipTransferStarted(address,address)` events emitted by the `switchable_beacon` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferStarted(address,address) event"
+
+[table.switchable_beacon__ownership_transfer_started.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.switchable_beacon__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `switchable_beacon` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.switchable_beacon__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.switchable_beacon__pinned]
+description = "`Pinned(address)` events emitted by the `switchable_beacon` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Pinned(address) event"
+
+[table.switchable_beacon__pinned.columns]
+implementation = "The `implementation` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__bounty_cap_set]
+description = "`BountyCapSet(bytes32,address,uint256,uint256)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per BountyCapSet(bytes32,address,uint256,uint256) event"
+
+[table.task_manager__bounty_cap_set.columns]
+newCap = "The `newCap` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+oldCap = "The `oldCap` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+projectId = "The `projectId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+token = "The `token` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__bounty_cap_set.footguns]
+big_ints = [
+    "oldCap",
+    "newCap",
+]
+overflows_dec = [
+    "oldCap",
+    "newCap",
+]
+
+[table.task_manager__executor_updated]
+description = "`ExecutorUpdated(address)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ExecutorUpdated(address) event"
+
+[table.task_manager__executor_updated.columns]
+newExecutor = "The `newExecutor` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__folders_updated]
+description = "`FoldersUpdated(bytes32,bytes32,address)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per FoldersUpdated(bytes32,bytes32,address) event"
+
+[table.task_manager__folders_updated.columns]
+newRoot = "The `newRoot` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+oldRoot = "The `oldRoot` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+sender = "The `sender` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__hat_set]
+description = "`HatSet(uint8,uint256,bool)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatSet(uint8,uint256,bool) event"
+
+[table.task_manager__hat_set.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hat = "The `hat` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatType = "The `hatType` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__hat_set.footguns]
+big_ints = ["hat"]
+overflows_dec = ["hat"]
+
+[table.task_manager__hat_toggled]
+description = "`HatToggled(uint256,bool)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatToggled(uint256,bool) event"
+
+[table.task_manager__hat_toggled.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__hat_toggled.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.task_manager__initialized]
+description = "`Initialized(uint64)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.task_manager__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__organizer_hat_allowed]
+description = "`OrganizerHatAllowed(uint256,bool)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OrganizerHatAllowed(uint256,bool) event"
+
+[table.task_manager__organizer_hat_allowed.columns]
+allowed = "The `allowed` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__organizer_hat_allowed.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.task_manager__project_cap_updated]
+description = "`ProjectCapUpdated(bytes32,uint256,uint256)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProjectCapUpdated(bytes32,uint256,uint256) event"
+
+[table.task_manager__project_cap_updated.columns]
+id = "The `id` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newCap = "The `newCap` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+oldCap = "The `oldCap` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__project_cap_updated.footguns]
+big_ints = [
+    "oldCap",
+    "newCap",
+]
+overflows_dec = [
+    "oldCap",
+    "newCap",
+]
+
+[table.task_manager__project_created]
+description = "A project: the folder tasks are grouped under, with its own bounty cap."
+grain = "one row per project"
+
+[table.task_manager__project_created.columns]
+cap = "The `cap` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+metadataHash = "The `metadataHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__project_created.footguns]
+big_ints = ["cap"]
+overflows_dec = ["cap"]
+
+[table.task_manager__project_deleted]
+description = "`ProjectDeleted(bytes32)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProjectDeleted(bytes32) event"
+
+[table.task_manager__project_deleted.columns]
+id = "The `id` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__project_manager_updated]
+description = "`ProjectManagerUpdated(bytes32,address,bool)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProjectManagerUpdated(bytes32,address,bool) event"
+
+[table.task_manager__project_manager_updated.columns]
+id = "The `id` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+isManager = "The `isManager` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+manager = "The `manager` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__project_role_perm_set]
+description = "`ProjectRolePermSet(bytes32,uint256,uint8)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ProjectRolePermSet(bytes32,uint256,uint8) event"
+
+[table.task_manager__project_role_perm_set.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+mask = "The `mask` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__project_role_perm_set.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.task_manager__role_perm_set]
+description = "`RolePermSet(uint256,uint8)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per RolePermSet(uint256,uint8) event"
+
+[table.task_manager__role_perm_set.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+mask = "The `mask` uint8 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__role_perm_set.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.task_manager__task_application_approved]
+description = "`TaskApplicationApproved(uint256,address,address)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskApplicationApproved(uint256,address,address) event"
+
+[table.task_manager__task_application_approved.columns]
+applicant = "The `applicant` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+approver = "The `approver` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_application_approved.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_application_submitted]
+description = "`TaskApplicationSubmitted(uint256,address,bytes32)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskApplicationSubmitted(uint256,address,bytes32) event"
+
+[table.task_manager__task_application_submitted.columns]
+applicant = "The `applicant` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+applicationHash = "The `applicationHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_application_submitted.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_assigned]
+description = "`TaskAssigned(uint256,address,address)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskAssigned(uint256,address,address) event"
+
+[table.task_manager__task_assigned.columns]
+assignee = "The `assignee` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+assigner = "The `assigner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_assigned.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_cancelled]
+description = "`TaskCancelled(uint256,address)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskCancelled(uint256,address) event"
+
+[table.task_manager__task_cancelled.columns]
+canceller = "The `canceller` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_cancelled.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_claim_deadline_set]
+description = "`TaskClaimDeadlineSet(uint256,uint48)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskClaimDeadlineSet(uint256,uint48) event"
+
+[table.task_manager__task_claim_deadline_set.columns]
+claimDeadline = "The `claimDeadline` uint48 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_claim_deadline_set.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_claim_expired]
+description = "`TaskClaimExpired(uint256,address,address)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskClaimExpired(uint256,address,address) event"
+
+[table.task_manager__task_claim_expired.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newClaimer = "The `newClaimer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousClaimer = "The `previousClaimer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_claim_expired.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_claimed]
+description = "`TaskClaimed(uint256,address)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskClaimed(uint256,address) event"
+
+[table.task_manager__task_claimed.columns]
+claimer = "The `claimer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_claimed.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_completed]
+description = "A task marked complete — the event that triggers the participation-token payout."
+grain = "one row per completion"
+
+[table.task_manager__task_completed.columns]
+completer = "The `completer` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_completed.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_created]
+description = "A bounty/task opened under a project. `payout` is in participation-token base units."
+grain = "one row per task"
+
+[table.task_manager__task_created.columns]
+bountyPayout = "The `bountyPayout` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+bountyToken = "The `bountyToken` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+metadataHash = "The `metadataHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+payout = "The `payout` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+project = "The `project` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+requiresApplication = "The `requiresApplication` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_created.footguns]
+big_ints = [
+    "id",
+    "payout",
+    "bountyPayout",
+]
+overflows_dec = [
+    "id",
+    "payout",
+    "bountyPayout",
+]
+
+[table.task_manager__task_deadlines_set]
+description = "`TaskDeadlinesSet(uint256,uint48,uint32)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskDeadlinesSet(uint256,uint48,uint32) event"
+
+[table.task_manager__task_deadlines_set.columns]
+absoluteDeadline = "The `absoluteDeadline` uint48 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+completionWindow = "The `completionWindow` uint32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_deadlines_set.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_rejected]
+description = "`TaskRejected(uint256,address,bytes32)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskRejected(uint256,address,bytes32) event"
+
+[table.task_manager__task_rejected.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+rejectionHash = "The `rejectionHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+rejector = "The `rejector` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_rejected.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_submitted]
+description = "`TaskSubmitted(uint256,bytes32)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskSubmitted(uint256,bytes32) event"
+
+[table.task_manager__task_submitted.columns]
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+submissionHash = "The `submissionHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_submitted.footguns]
+big_ints = ["id"]
+overflows_dec = ["id"]
+
+[table.task_manager__task_updated]
+description = "`TaskUpdated(uint256,uint256,address,uint256,bytes,bytes32)` events emitted by the `task_manager` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per TaskUpdated(uint256,uint256,address,uint256,bytes,bytes32) event"
+
+[table.task_manager__task_updated.columns]
+bountyPayout = "The `bountyPayout` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+bountyToken = "The `bountyToken` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+id = "The `id` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+metadataHash = "The `metadataHash` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+payout = "The `payout` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+title = "The `title` bytes parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.task_manager__task_updated.footguns]
+big_ints = [
+    "id",
+    "payout",
+    "bountyPayout",
+]
+overflows_dec = [
+    "id",
+    "payout",
+    "bountyPayout",
+]
+
+[table.toggle_module__admin_transferred]
+description = "`AdminTransferred(address,address)` events emitted by the `toggle_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per AdminTransferred(address,address) event"
+
+[table.toggle_module__admin_transferred.columns]
+newAdmin = "The `newAdmin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+oldAdmin = "The `oldAdmin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.toggle_module__hat_toggled]
+description = "`HatToggled(uint256,bool)` events emitted by the `toggle_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per HatToggled(uint256,bool) event"
+
+[table.toggle_module__hat_toggled.columns]
+hatId = "The `hatId` uint256 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+newStatus = "The `newStatus` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.toggle_module__hat_toggled.footguns]
+big_ints = ["hatId"]
+overflows_dec = ["hatId"]
+
+[table.toggle_module__initialized]
+description = "`Initialized(uint64)` events emitted by the `toggle_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.toggle_module__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.toggle_module__toggle_module_initialized]
+description = "`ToggleModuleInitialized(address)` events emitted by the `toggle_module` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ToggleModuleInitialized(address) event"
+
+[table.toggle_module__toggle_module_initialized.columns]
+admin = "The `admin` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[view]
+
+# Authored views (views/*.sql) are described here so the MCP/`/schema` can render them:
+# [view.your_view_name]
+# description = "What this derivation computes."
