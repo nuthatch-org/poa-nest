@@ -1,0 +1,113 @@
+schema_version = 1
+
+[nest]
+description = """
+POA — a DAO-tooling stack on Arbitrum One: an org deployer that mints a full governance suite
+(two voting modules, a task manager, an education hub, a participation token, a payment manager)
+per organisation, with roles carried by Hats Protocol and gas sponsored by a paymaster hub.
+
+Parity target: subgraph QmVPhLwuv9zn2c761Ua7eJAFXBmrNsW32XUYsj1GKtNX4X.
+
+Scale note before you write a query: this deployment has exactly ONE org (orgId
+0xa71879ef0e38b15fe7080196c0102f859e0ca8e7b8c0703ec8df03c66befd069, deployed at block 447060036)
+and ~850 events in total across ~43M blocks. Every table here is tiny. If a query returns
+thousands of rows, you have made a cartesian join, not a discovery.
+"""
+
+# --- protocol infrastructure -------------------------------------------------
+
+[table.poa_manager__beacon_created]
+description = "A new upgradeable module type registered on the protocol. typeName is the human label ('HybridVoting', 'TaskManager', …); typeId is its keccak key used everywhere else."
+grain = "one row per module type ever registered"
+
+[table.poa_manager__beacon_upgraded]
+description = "A module type's implementation was swapped. The protocol's upgrade history — the busiest infra table here."
+grain = "one row per upgrade of one module type"
+
+[table.poa_manager__infrastructure_deployed]
+description = "Fires exactly once, at block 447060027, announcing the six singleton infrastructure addresses. This is why org_deployer/org_registry/paymaster_hub/account_registry are static contracts in this nest rather than factory templates."
+grain = "one row, ever"
+
+[table.org_deployer__org_deployed]
+description = "A new organisation and its ten governance modules, all in one event. Each module address is its own named column (hybridVoting, taskManager, …)."
+grain = "one row per organisation"
+
+[table.org_registry__org_registered]
+description = "An org's canonical registry entry. `name` is bytes-encoded, not a string — decode it rather than comparing it directly."
+grain = "one row per organisation"
+
+[table.org_registry__contract_registered]
+description = "Every module proxy registered against an org, with the SwitchableBeacon fronting it. This is the factory event that discovers the switchable_beacon children."
+grain = "one row per (org, module)"
+
+# --- governance --------------------------------------------------------------
+
+[table.hybrid_voting__new_proposal]
+description = "A proposal opened on the hybrid (token + participation weighted) voting module."
+grain = "one row per proposal"
+
+[table.hybrid_voting__vote_cast]
+description = "A vote on a hybrid proposal. NOTE: this is a different event shape from dd_voting__vote_cast — it carries per-class weights. The two are deliberately separate tables; do not UNION them without aligning columns."
+grain = "one row per vote"
+
+[table.hybrid_voting__winner]
+description = "The resolved outcome of a hybrid proposal."
+grain = "one row per resolved proposal"
+
+[table.dd_voting__vote_cast]
+description = "A vote on the direct-democracy module (one member, one vote). Different signature from hybrid_voting__vote_cast — see that table's note."
+grain = "one row per vote"
+
+# --- work and membership -----------------------------------------------------
+
+[table.task_manager__task_created]
+description = "A bounty/task opened under a project. `payout` is in participation-token base units."
+grain = "one row per task"
+
+[table.task_manager__task_completed]
+description = "A task marked complete — the event that triggers the participation-token payout."
+grain = "one row per completion"
+
+[table.task_manager__project_created]
+description = "A project: the folder tasks are grouped under, with its own bounty cap."
+grain = "one row per project"
+
+[table.hats__transfer_single]
+description = "Hats Protocol role assignment. A mint is from = 0x0; a burn/revoke is to = 0x0. The largest table in this nest and the source of truth for who holds which role — `id` is the hat ID, not an ERC-20 amount."
+grain = "one row per role grant or revocation"
+
+[table.eligibility_module__vouched]
+description = "One member vouching for another's eligibility for a role — the social-graph layer of role assignment."
+grain = "one row per vouch"
+
+[table.account_registry__user_registered]
+description = "A username claimed against an address in the universal account registry."
+grain = "one row per registration"
+
+[table.quick_join__quick_joined]
+description = "A member joining an org through the QuickJoin flow, receiving their initial hats."
+grain = "one row per join"
+
+# --- economics ---------------------------------------------------------------
+
+[table.participation_token__transfer]
+description = "Non-transferable participation-token movement — minted for completed work, not traded. A mint is from = 0x0."
+grain = "one row per token movement"
+
+[table.paymaster_hub__usage_increased]
+description = "Gas sponsored on an org's behalf. The main cost-tracking table."
+grain = "one row per sponsored operation batch"
+
+[table.paymaster_hub__rule_set]
+description = "A sponsorship rule: which (target, selector) pairs the paymaster will fund for an org. The busiest paymaster table."
+grain = "one row per rule change"
+
+# --- factory-discovered ------------------------------------------------------
+
+[table.switchable_beacon__children]
+description = "The SwitchableBeacon proxies discovered at runtime from org_registry__contract_registered. Ten of them, one per registered module. `parent_address` is always the org registry."
+grain = "one row per discovered beacon"
+
+[table.switchable_beacon__mode_changed]
+description = "A beacon flipping between auto-upgrade (follows the protocol implementation) and pinned (frozen at one implementation) — the per-org upgrade-autonomy switch."
+grain = "one row per mode change"

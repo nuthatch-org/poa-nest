@@ -1,0 +1,195 @@
+[nest]
+name = "poa"
+chain = "arbitrum-one"
+chain_id = 42161
+# A usable endpoint here must do BOTH a wide eth_getLogs (this nest backfills 42.8M blocks at
+# --window 50000) and JSON-RPC batches >3 (the block-timestamp fetcher), over archive history
+# back to block 447059849. Measured on the free public endpoints, not assumed:
+#   arb1.arbitrum.io            getLogs 50k OK, batch OK, but rate-limits into partial
+#                               timestamp responses near the tip (retries recover)
+#   arbitrum-one.public.blastapi.io / 1rpc.io/arb   getLogs capped   (timestamp fallback only)
+#   arbitrum.drpc.org           batch capped at 3 on the free plan — timestamps never complete
+#   arb-pokt.nodies.app         403 on getLogs
+#
+# These public endpoints work but are slow and flaky. Override with your own archive node:
+#   nuthatch dev --dir . --seal-direct --window 50000 --concurrency 8 --rpc https://your-node/
+# `--rpc` is tried first and keeps these as fallback, so the private URL never enters the repo.
+rpc_urls = [
+    "https://arb1.arbitrum.io/rpc",
+    "https://arbitrum-one.public.blastapi.io",
+]
+schema_version = 1
+
+# Parity target: subgraph QmVPhLwuv9zn2c761Ua7eJAFXBmrNsW32XUYsj1GKtNX4X (arbitrum-one).
+# ABIs are the exact ones pinned by that manifest, fetched from IPFS — not Sourcify. Every
+# module here is a beacon proxy, so Sourcify/Etherscan would hand back the proxy ABI, which
+# has none of the real events.
+#
+# The subgraph declares 6 static dataSources + 19 ethereum templates. Most of those templates
+# are *singletons* discovered from one-shot events, which is why they are static contracts
+# here — see the two groups below. Event allowlists are omitted deliberately: nuthatch decodes
+# every event in each ABI, so this nest is a strict superset of the subgraph's event coverage.
+
+# ---------------------------------------------------------------------------
+# Group 1: protocol infrastructure.
+#
+# PoaManager/GovernanceFactory/PoaManagerHub/Hats/PoaDKIMRegistry are static in the subgraph
+# too. The next four (org_deployer, org_registry, paymaster_hub, account_registry) are
+# *templates* in the subgraph, spawned by PoaManager.InfrastructureDeployed — but that event
+# fires exactly once, at block 447060027, so their addresses are knowable ahead of time and
+# pinning them costs nothing. Verified on-chain:
+#   InfrastructureDeployed(orgDeployer, orgRegistry, implRegistry,
+#                          paymasterHub, globalAccountRegistry, passkeyAccountFactoryBeacon)
+# ---------------------------------------------------------------------------
+
+[[contracts]]
+alias = "poa_manager"
+address = "0xff585fae4a944cd173b19158c6fc5e08980b0815"
+start_block = 447059849
+abi = "abis/poa_manager.json"
+
+[[contracts]]
+alias = "gov_factory"
+address = "0x24fd3b269905af10a6e5c67d93f0502cd11af875"
+start_block = 447059876
+abi = "abis/gov_factory.json"
+
+[[contracts]]
+alias = "poa_manager_hub"
+address = "0xb72840b343654eafb2cff7acc4fc6b59e6c3cc71"
+start_block = 447060030
+abi = "abis/poa_manager_hub.json"
+
+[[contracts]]
+alias = "hats"
+address = "0x3bc1a0ad72417f2d411118085256fc53cbddd137"
+start_block = 447059849
+abi = "abis/hats.json"
+
+[[contracts]]
+alias = "dkim_registry"
+address = "0xc2ddbc0a6fc4410efe78904bee48558ead0de112"
+start_block = 489000759
+abi = "abis/dkim_registry.json"
+
+[[contracts]]
+alias = "org_deployer"
+address = "0x1ad59e785e3aec1c53069f78becc24ecfe6a5d1c"
+start_block = 447060027
+abi = "abis/org_deployer.json"
+
+[[contracts]]
+alias = "org_registry"
+address = "0x7b023b9566b96616d54935ae8de80579c93f62ac"
+start_block = 447060027
+abi = "abis/org_registry.json"
+
+[[contracts]]
+alias = "paymaster_hub"
+address = "0xd6659bcafadcb9cc2f57b7ae923c7f1ca4438a11"
+start_block = 447060027
+abi = "abis/paymaster_hub.json"
+
+[[contracts]]
+alias = "account_registry"
+address = "0x01a13c92321e9ca2c02577b92a4f8d2fdc4d8513"
+start_block = 447060027
+abi = "abis/account_registry.json"
+
+# ---------------------------------------------------------------------------
+# Group 2: the org's governance modules.
+#
+# OrgDeployer.OrgDeployed announces all ten in a single event, one address per named param.
+# They CANNOT be expressed as ten [[factories]] rules: nuthatch keys factory rules by
+# `{watch}__{event}`, so ten rules on org_deployer__org_deployed would collide and only the
+# last would survive. They also cannot share one template — five event *names* in this system
+# carry two different signatures (VoteCast, Winner, PauseSet, OrgRegistered, BatchExecuted),
+# and tables are named per event *name*, so a shared template would produce two decoders
+# fighting over one table.
+#
+# One org exists on this deployment (orgId 0xa71879ef…, block 447060036), so its modules are
+# pinned directly. Each gets its own alias, hence its own clean table namespace —
+# hybrid_voting__vote_cast and dd_voting__vote_cast stay separate, which is the whole point.
+# When a second org deploys, run `nuthatch add` with its module addresses.
+# ---------------------------------------------------------------------------
+
+[[contracts]]
+alias = "executor"
+address = "0xb1ff2bd0231770ccc91801aa1fae4b3226e1fe41"
+start_block = 447060036
+abi = "abis/executor.json"
+
+[[contracts]]
+alias = "hybrid_voting"
+address = "0x34aa1bd79a3a5eb5d2b208eb4f091ccf6b1081d5"
+start_block = 447060036
+abi = "abis/hybrid_voting.json"
+
+[[contracts]]
+alias = "dd_voting"
+address = "0xc82b179f5b4e325ac1b77a423fdb266aebfca5e8"
+start_block = 447060036
+abi = "abis/dd_voting.json"
+
+[[contracts]]
+alias = "quick_join"
+address = "0x366c605a3064a680fb5c05bf9eeda512fddbf03a"
+start_block = 447060036
+abi = "abis/quick_join.json"
+
+[[contracts]]
+alias = "participation_token"
+address = "0x33cd0b9ae54c43c11fd05fe00afd3dbc71d9603e"
+start_block = 447060036
+abi = "abis/participation_token.json"
+
+[[contracts]]
+alias = "task_manager"
+address = "0x681f29751724d2bed331d3eb35e0c9b1c57af9f0"
+start_block = 447060036
+abi = "abis/task_manager.json"
+
+[[contracts]]
+alias = "education_hub"
+address = "0xe37db8ccd295c9e4febb19a91efe13ace24ca596"
+start_block = 447060036
+abi = "abis/education_hub.json"
+
+[[contracts]]
+alias = "payment_manager"
+address = "0xae470b8366af331f52d9ea26efd7cb2d276878b3"
+start_block = 447060036
+abi = "abis/payment_manager.json"
+
+[[contracts]]
+alias = "eligibility_module"
+address = "0xe4f9cb9c843d0a5bd5d52e3266138b13a635743b"
+start_block = 447060036
+abi = "abis/eligibility_module.json"
+
+[[contracts]]
+alias = "toggle_module"
+address = "0x14aced4f1b6fb1ef4030e7e7e19a3e6ab0b931a1"
+start_block = 447060036
+abi = "abis/toggle_module.json"
+
+# ---------------------------------------------------------------------------
+# The one genuine factory in the system.
+#
+# Every module is fronted by a SwitchableBeacon, minted per module and announced by
+# OrgRegistry.ContractRegistered(contractId, orgId, typeId, proxy, beacon, autoUpgrade, owner).
+# One event, one child type, N children — the shape nuthatch factories are actually for. This
+# also keeps working for orgs deployed after this nest was written: their beacons get picked
+# up with no config change.
+# ---------------------------------------------------------------------------
+
+[[templates]]
+name = "switchable_beacon"
+abi = "abis/switchable_beacon.json"
+
+[[factories]]
+watch = "org_registry"
+event = "ContractRegistered"
+child_param = "beacon"
+template = "switchable_beacon"
+start = 447060027

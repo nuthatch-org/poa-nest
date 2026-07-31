@@ -1,0 +1,5 @@
+# Regenerable index state — rebuilt from chain in ~90s.
+nuthatch.redb
+nuthatch.redb.lock
+segments/
+*.log
