@@ -16,6 +16,43 @@ SELECT
 FROM "org_registry__contract_registered" c
 LEFT JOIN "poa_manager__beacon_created" b ON b.typeId = c.typeId;
 
+-- Full registration history of every module implementation, with its version string.
+--
+-- `latest` is the flag as it was set AT REGISTRATION — events are immutable, so it is never
+-- retroactively cleared when a newer implementation lands. Most types therefore have several
+-- rows with is_latest_at_registration = true. It answers "was this registered as latest?", NOT
+-- "is this current?". Use module_current_version below for the latter.
+CREATE VIEW module_version AS
+SELECT
+    typeId                      AS type_id,
+    typeName                    AS type_name,
+    version                     AS version,
+    implementation              AS implementation,
+    latest                      AS is_latest_at_registration,
+    versionId                   AS version_id,
+    block_number                AS registered_block,
+    block_timestamp             AS registered_at
+FROM "implementation_registry__implementation_registered";
+
+-- The current implementation per module type: the most recent registration that claimed `latest`,
+-- ordered by (block, log_index).
+--
+-- Deliberately ordered by block, NOT by the version string. Version labels are not monotonic in
+-- this deployment — EligibilityModule registered v11 at block 458043730 and then v4 at 467001431 —
+-- so "highest version" and "most recently registered" are different questions, and only the second
+-- is answerable from the event log. If you need the value the contract itself would return today,
+-- that is an eth_call, which this nest deliberately does not make.
+CREATE VIEW module_current_version AS
+SELECT type_id, type_name, version, implementation, registered_block, registered_at
+FROM (
+    SELECT *, row_number() OVER (
+        PARTITION BY type_id ORDER BY registered_block DESC, version_id DESC
+    ) AS rn
+    FROM module_version
+    WHERE is_latest_at_registration
+)
+WHERE rn = 1;
+
 -- Protocol-wide upgrade history per module type: when each type was last upgraded and to what.
 -- BeaconUpgraded is the busiest infrastructure table in this nest.
 CREATE VIEW module_type AS

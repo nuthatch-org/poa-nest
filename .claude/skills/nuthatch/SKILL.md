@@ -11,6 +11,7 @@ Contracts indexed on arbitrum-one:
 - `poa_manager_hub` = 0xb72840b343654eafb2cff7acc4fc6b59e6c3cc71
 - `hats` = 0x3bc1a0ad72417f2d411118085256fc53cbddd137
 - `dkim_registry` = 0xc2ddbc0a6fc4410efe78904bee48558ead0de112
+- `implementation_registry` = 0x5e5f4269ef727ffde6a62509c27a7c6c0d39dbb9
 - `org_deployer` = 0x1ad59e785e3aec1c53069f78becc24ecfe6a5d1c
 - `org_registry` = 0x7b023b9566b96616d54935ae8de80579c93f62ac
 - `paymaster_hub` = 0xd6659bcafadcb9cc2f57b7ae923c7f1ca4438a11

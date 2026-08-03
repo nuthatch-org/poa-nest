@@ -1073,6 +1073,33 @@ overflows_dec = [
     "winningIdx",
 ]
 
+[table.implementation_registry__implementation_registered]
+description = "`ImplementationRegistered(bytes32,string,bytes32,string,address,bool)` events emitted by the `implementation_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per ImplementationRegistered(bytes32,string,bytes32,string,address,bool) event"
+
+[table.implementation_registry__implementation_registered.columns]
+implementation = "The `implementation` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+latest = "The `latest` bool parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeId = "The `typeId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+typeName = "The `typeName` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+version = "The `version` string parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+versionId = "The `versionId` bytes32 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.implementation_registry__initialized]
+description = "`Initialized(uint64)` events emitted by the `implementation_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per Initialized(uint64) event"
+
+[table.implementation_registry__initialized.columns]
+version = "The `version` uint64 parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
+[table.implementation_registry__ownership_transferred]
+description = "`OwnershipTransferred(address,address)` events emitted by the `implementation_registry` contract. (seeded from the ABI - edit semantic.toml to improve this)"
+grain = "one row per OwnershipTransferred(address,address) event"
+
+[table.implementation_registry__ownership_transferred.columns]
+newOwner = "The `newOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+previousOwner = "The `previousOwner` address parameter. (seeded from the ABI - edit semantic.toml to improve this)"
+
 [table.org_deployer__initial_wearers_assigned]
 description = "`InitialWearersAssigned(bytes32,address,address[],uint256[])` events emitted by the `org_deployer` contract. (seeded from the ABI - edit semantic.toml to improve this)"
 grain = "one row per InitialWearersAssigned(bytes32,address,address[],uint256[]) event"

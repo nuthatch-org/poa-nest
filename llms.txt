@@ -8,6 +8,7 @@ A self-hosted blockchain index. Query it locally; there is no third-party API.
 - `poa_manager_hub` = 0xb72840b343654eafb2cff7acc4fc6b59e6c3cc71
 - `hats` = 0x3bc1a0ad72417f2d411118085256fc53cbddd137
 - `dkim_registry` = 0xc2ddbc0a6fc4410efe78904bee48558ead0de112
+- `implementation_registry` = 0x5e5f4269ef727ffde6a62509c27a7c6c0d39dbb9
 - `org_deployer` = 0x1ad59e785e3aec1c53069f78becc24ecfe6a5d1c
 - `org_registry` = 0x7b023b9566b96616d54935ae8de80579c93f62ac
 - `paymaster_hub` = 0xd6659bcafadcb9cc2f57b7ae923c7f1ca4438a11
@@ -113,6 +114,9 @@ A self-hosted blockchain index. Query it locally; there is no third-party API.
 - `hybrid_voting__threshold_pct_set` - ThresholdPctSet(uint8) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, pct)
 - `hybrid_voting__vote_cast` - VoteCast(uint256,address,uint8[],uint8[],uint256[],uint64) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, id, voter, idxs, weights, classRawPowers, timestamp)
 - `hybrid_voting__winner` - Winner(uint256,uint256,bool,bool,uint64) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, id, winningIdx, valid, executed, timestamp)
+- `implementation_registry__implementation_registered` - ImplementationRegistered(bytes32,string,bytes32,string,address,bool) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, typeId, typeName, versionId, version, implementation, latest)
+- `implementation_registry__initialized` - Initialized(uint64) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, version)
+- `implementation_registry__ownership_transferred` - OwnershipTransferred(address,address) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, previousOwner, newOwner)
 - `org_deployer__initial_wearers_assigned` - InitialWearersAssigned(bytes32,address,address[],uint256[]) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, orgId, eligibilityModule, wearers, hatIds)
 - `org_deployer__initialized` - Initialized(uint64) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, version)
 - `org_deployer__org_deployed` - OrgDeployed(bytes32,address,address,address,address,address,address,address,address,address,address,uint256,uint256[]) (block_number, block_hash, block_timestamp, tx_hash, log_index, address, _seq, orgId, executor, hybridVoting, directDemocracyVoting, quickJoin, participationToken, taskManager, educationHub, paymentManager, eligibilityModule, toggleModule, topHatId, roleHatIds)

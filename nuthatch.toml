@@ -72,6 +72,17 @@ address = "0xc2ddbc0a6fc4410efe78904bee48558ead0de112"
 start_block = 489000759
 abi = "abis/dkim_registry.json"
 
+# The sixth address from InfrastructureDeployed. It was absent from the QmVPhL manifest this nest
+# was first built against, so it was skipped; QmRx2f (the current deployment) promotes it to a
+# static dataSource. It carries ~100 events — the protocol's implementation/version registry,
+# which is where `ImplementationRegistered(typeId, typeName, versionId, version, impl, latest)`
+# records what each module type's code actually is.
+[[contracts]]
+alias = "implementation_registry"
+address = "0x5e5f4269ef727ffde6a62509c27a7c6c0d39dbb9"
+start_block = 447059849
+abi = "abis/implementation_registry.json"
+
 [[contracts]]
 alias = "org_deployer"
 address = "0x1ad59e785e3aec1c53069f78becc24ecfe6a5d1c"

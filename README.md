@@ -2,17 +2,17 @@
 
 A [nuthatch](https://github.com/nightswatchhq/nuthatch) indexer for the **POA** DAO-tooling stack
 on Arbitrum One — a drop-in replacement for subgraph
-`QmVPhLwuv9zn2c761Ua7eJAFXBmrNsW32XUYsj1GKtNX4X`, which has been stuck syncing for over a day.
+`QmRx2fUCpZ3B8q1uLfL3XKAb4H6XPHtSE4GLmf2UT2YczQ`, which has been stuck syncing for days.
 
-**It syncs in 59 seconds.**
+**It syncs in 66 seconds.**
 
 | | Subgraph | This nest |
 |---|---|---|
-| Blocks to scan | 42,556,146 | 42,556,146 |
-| Events in that range | 848 | 848 |
-| Time to fully synced | still going, >24h | **59 seconds** |
+| Blocks to scan | 43,530,436 | 43,530,436 |
+| Events in that range | 951 | 951 |
+| Time to fully synced | still going, days | **66 seconds** |
 
-Same chain, same contracts, same 848 events. The difference is entirely in how the work is done —
+Same chain, same contracts, same 951 events. The difference is entirely in how the work is done —
 see [Why the subgraph is stuck](#why-the-subgraph-is-stuck).
 
 You don't need to know anything about nuthatch to use this. It's a single Rust binary that reads
@@ -52,24 +52,24 @@ nuthatch sql --url http://127.0.0.1:8288 "SELECT status, count(*) FROM task GROU
 It isn't data volume. Measured directly against Arbitrum One, the entire deployment is:
 
 - **1** organisation deployed (orgId `0xa71879ef…`, block 447,060,036)
-- **848** events, total, across 42.5M blocks
+- **951** events, total, across 43.5M blocks
 - **10** module proxies and their beacons
 
-That is a rounding error of a workload. It's been stuck for a day on something that fits in a
-spreadsheet. The cause is the manifest's *shape*, not its size — 6 static data sources and
-**29 templates**, of which:
+That is a rounding error of a workload. It's been stuck for days on something that fits in a
+spreadsheet. The cause is the manifest's *shape*, not its size — 7 static data sources and
+**30 templates**, of which:
 
 **10 are `file/ipfs` data sources.** Org names, task descriptions, proposal bodies. Every one is a
 blocking IPFS fetch that graph-node must resolve before it can advance. If a CID is slow, unpinned,
 or simply gone, indexing stalls behind it — and nothing about that failure is visible as "the chain
 is fine, the metadata isn't".
 
-**19 are Ethereum templates.** Each org deployment spawns ~15 dynamic data sources, and every one
+**20 are Ethereum templates.** Each org deployment spawns ~15 dynamic data sources, and every one
 widens the block-stream filter that gets evaluated per block.
 
 nuthatch takes the opposite approach on both counts:
 
-- **Wide `eth_getLogs` windows** — 50,000 blocks per request, so 42.5M blocks is ~850 requests
+- **Wide `eth_getLogs` windows** — 50,000 blocks per request, so 43.5M blocks is ~870 requests
   rather than a per-block stream. This is the whole ballgame for a sparse contract set.
 - **Nothing on the indexing path touches IPFS.** Metadata *hashes* are indexed as ordinary columns
   (`metadata_hash`), so you can fetch and join them client-side, on your own schedule, and a dead
@@ -119,8 +119,8 @@ What the flags do:
 
 - `--seal-direct` — write finalised history straight to Parquet, skipping the hot store. Much
   faster for a from-scratch backfill. Drop it on subsequent runs.
-- `--window 50000` — how many blocks per `eth_getLogs` call. This system is extremely sparse (848
-  events across 42M blocks), so a wide window turns ~850 requests into a job that finishes in
+- `--window 50000` — how many blocks per `eth_getLogs` call. This system is extremely sparse (951
+  events across 43.5M blocks), so a wide window turns ~850 requests into a job that finishes in
   minutes. Lower it if your provider rejects the range.
 - `--rpc` — your endpoint, tried ahead of the configured ones.
 
@@ -182,6 +182,8 @@ exposed.
 |---|---|
 | `org` | The organisation, with all ten module addresses as columns |
 | `org_module` | Each registered module resolved to its human-readable type name and beacon |
+| `module_version` | Every implementation registration, with version strings |
+| `module_current_version` | The current implementation per module type |
 | `module_type` | Protocol-wide module types and their upgrade counts |
 | `role_wearer` | Current Hats Protocol role holders (mints netted against burns) |
 | `role` | Holder count per hat |
@@ -207,7 +209,8 @@ manager is `task_manager__task_created`. 207 tables exist; ~130 have rows. `curl
 lists all of them with descriptions and warnings.
 
 The aliases are `poa_manager`, `gov_factory`, `poa_manager_hub`, `hats`, `dkim_registry`,
-`org_deployer`, `org_registry`, `paymaster_hub`, `account_registry`, `executor`, `hybrid_voting`,
+`org_deployer`, `org_registry`, `paymaster_hub`, `account_registry`, `implementation_registry`,
+`executor`, `hybrid_voting`,
 `dd_voting`, `quick_join`, `participation_token`, `task_manager`, `education_hub`,
 `payment_manager`, `eligibility_module`, `toggle_module`, plus `switchable_beacon` for the
 factory-discovered children.
@@ -305,7 +308,7 @@ change.
 ## Layout
 
 ```
-nuthatch.toml     19 contracts, 1 template, 1 factory rule — the whole config
+nuthatch.toml     20 contracts, 1 template, 1 factory rule — the whole config
 abis/             20 ABIs, vendored from the subgraph's own IPFS CIDs
 views/            10 entity views as plain CREATE VIEW SQL
 checks/           3 invariant checks + their recorded fixtures
@@ -325,4 +328,4 @@ queries that follow its advice fail. Regenerating takes a second:
 nuthatch schema --dir .
 ```
 
-Delete `segments/` and `nuthatch.redb` to force a clean rebuild. It takes 90 seconds.
+Delete `segments/` and `nuthatch.redb` to force a clean rebuild. It takes about a minute.

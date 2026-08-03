@@ -1,5 +1,5 @@
 {
-  "registry_hash": "0x33fb395b0b97148cc8c77b11faff51f86cf34a55065bbea3f62fc6d54b3b3d34",
+  "registry_hash": "0x8236d59bf83599a0a63bf343cd09d260c69baada852f8659568d884ed10169ca",
   "tables": [
     {
       "alias": "account_registry",
@@ -5770,6 +5770,210 @@
       "event": "Winner(uint256,uint256,bool,bool,uint64)",
       "table": "hybrid_voting__winner",
       "topic0": "0x6bbb1049f4cdf766400577e9707bcac2bda8997debeb95e29afb1bb18f261424"
+    },
+    {
+      "alias": "implementation_registry",
+      "columns": [
+        {
+          "indexed": false,
+          "name": "block_number",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "block_hash",
+          "sol_type": "implicit",
+          "storage": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "block_timestamp",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "tx_hash",
+          "sol_type": "implicit",
+          "storage": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "log_index",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "address",
+          "sol_type": "implicit",
+          "storage": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_seq",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": true,
+          "name": "typeId",
+          "sol_type": "bytes32",
+          "storage": "fixed_bytes"
+        },
+        {
+          "indexed": false,
+          "name": "typeName",
+          "sol_type": "string",
+          "storage": "string"
+        },
+        {
+          "indexed": true,
+          "name": "versionId",
+          "sol_type": "bytes32",
+          "storage": "fixed_bytes"
+        },
+        {
+          "indexed": false,
+          "name": "version",
+          "sol_type": "string",
+          "storage": "string"
+        },
+        {
+          "indexed": false,
+          "name": "implementation",
+          "sol_type": "address",
+          "storage": "address"
+        },
+        {
+          "indexed": false,
+          "name": "latest",
+          "sol_type": "bool",
+          "storage": "bool"
+        }
+      ],
+      "event": "ImplementationRegistered(bytes32,string,bytes32,string,address,bool)",
+      "table": "implementation_registry__implementation_registered",
+      "topic0": "0xc220969f2ec0ab0a99cc8ff4e4129f71339d076050af38c2aa054d10e9cec5a7"
+    },
+    {
+      "alias": "implementation_registry",
+      "columns": [
+        {
+          "indexed": false,
+          "name": "block_number",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "block_hash",
+          "sol_type": "implicit",
+          "storage": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "block_timestamp",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "tx_hash",
+          "sol_type": "implicit",
+          "storage": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "log_index",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "address",
+          "sol_type": "implicit",
+          "storage": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_seq",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "version",
+          "sol_type": "uint64",
+          "storage": "u64"
+        }
+      ],
+      "event": "Initialized(uint64)",
+      "table": "implementation_registry__initialized",
+      "topic0": "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
+    },
+    {
+      "alias": "implementation_registry",
+      "columns": [
+        {
+          "indexed": false,
+          "name": "block_number",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "block_hash",
+          "sol_type": "implicit",
+          "storage": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "block_timestamp",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "tx_hash",
+          "sol_type": "implicit",
+          "storage": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "log_index",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": false,
+          "name": "address",
+          "sol_type": "implicit",
+          "storage": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_seq",
+          "sol_type": "implicit",
+          "storage": "u64"
+        },
+        {
+          "indexed": true,
+          "name": "previousOwner",
+          "sol_type": "address",
+          "storage": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newOwner",
+          "sol_type": "address",
+          "storage": "address"
+        }
+      ],
+      "event": "OwnershipTransferred(address,address)",
+      "table": "implementation_registry__ownership_transferred",
+      "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
     },
     {
       "alias": "org_deployer",
