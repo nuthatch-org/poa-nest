@@ -1,6 +1,6 @@
 # POA nest
 
-A [nuthatch](https://github.com/nightswatchhq/nuthatch) indexer for the **POA** DAO-tooling stack
+A [nuthatch](https://github.com/nuthatch-org/nuthatch) indexer for the **POA** DAO-tooling stack
 on Arbitrum One — a drop-in replacement for subgraph
 `QmRx2fUCpZ3B8q1uLfL3XKAb4H6XPHtSE4GLmf2UT2YczQ`, which has been stuck syncing for days.
 
@@ -24,7 +24,7 @@ Docker, no IPFS, no hosted service, no API key, no rate limits, no bill. It runs
 ## TL;DR
 
 ```sh
-cargo install --git https://github.com/nightswatchhq/nuthatch nuthatch   # or the install.sh one-liner
+cargo install --git https://github.com/nuthatch-org/nuthatch nuthatch   # or the install.sh one-liner
 cd poa
 
 # 1. Backfill the whole history (~60s), then Ctrl-C once it says "sealing history done".
